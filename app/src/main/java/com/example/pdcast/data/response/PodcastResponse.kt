@@ -23,7 +23,7 @@ data class Results (
     @SerializedName("trackCensoredName") var trackCensoredName : String,
     @SerializedName("artistViewUrl") var artistViewUrl : String,
     @SerializedName("collectionViewUrl") var collectionViewUrl : String,
-    @SerializedName("feedUrl") var feedUrl : String,
+    @SerializedName("feedUrl") var feedUrl : String?,
     @SerializedName("trackViewUrl") var trackViewUrl : String,
     @SerializedName("artworkUrl30") var artworkUrl30 : String,
     @SerializedName("artworkUrl60") var artworkUrl60 : String,
