@@ -8,12 +8,16 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.pdcast.data.response.RssFeedResponse
 import com.example.pdcast.databinding.EpisodeItemsBinding
 
-class EpisodeItemAdapter(private val episodes: List<RssFeedResponse.EpisodeResponse>,private val listener:(String) -> Unit) : RecyclerView.Adapter<EpisodeItemAdapter.EpisodeItemViewHolder>() {
+class EpisodeItemAdapter(
+    private val episodes: List<RssFeedResponse.EpisodeResponse>,
+    private val episodeListener: EpisodeListener
+) : RecyclerView.Adapter<EpisodeItemAdapter.EpisodeItemViewHolder>() {
 
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): EpisodeItemViewHolder {
-        val binding = EpisodeItemsBinding.inflate(LayoutInflater.from(parent.context),parent,false)
-       return  EpisodeItemViewHolder(binding)
+        val binding =
+            EpisodeItemsBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        return EpisodeItemViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: EpisodeItemViewHolder, position: Int) {
@@ -26,21 +30,33 @@ class EpisodeItemAdapter(private val episodes: List<RssFeedResponse.EpisodeRespo
     }
 
 
-    inner class EpisodeItemViewHolder(private val binding: EpisodeItemsBinding) :RecyclerView.ViewHolder(binding.root) {
+    inner class EpisodeItemViewHolder(private val binding: EpisodeItemsBinding) :
+        RecyclerView.ViewHolder(binding.root) {
         fun bind(currentItem: RssFeedResponse.EpisodeResponse) {
             binding.tvTitle.text = currentItem.title
-            binding.tvDescription.text= currentItem.description
+            binding.tvDescription.text = currentItem.description
             binding.tvPubdate.text = currentItem.pubDate
             binding.duration.text = currentItem.duration
             binding.play.setOnClickListener {
                 Log.d(TAG, "bind-Link: ${currentItem.episodeUrl}")
-                currentItem.episodeUrl?.let { it1 -> listener(it1) }
+                currentItem.episodeUrl?.let { it1 -> episodeListener.onEpisodeClicked(it1) }
+            }
+
+            binding.root.setOnLongClickListener {
+                Log.d(TAG, "bind: ${currentItem.episodeUrl}")
+                episodeListener.onEpisodeLongClicked(currentItem.episodeUrl ?: "")
+                true
             }
         }
 
     }
 
-    companion object{
+    companion object {
         private const val TAG = "EpisodeItemAdapter"
     }
+}
+
+interface EpisodeListener {
+    fun onEpisodeClicked(url: String)
+    fun onEpisodeLongClicked(url: String)
 }
