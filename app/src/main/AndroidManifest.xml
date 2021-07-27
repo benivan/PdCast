@@ -4,7 +4,14 @@
 
     <uses-permission android:name="android.permission.INTERNET"/>
 
+<!--    <service android:name=".MediaPlaybackService">-->
+<!--        <intent-filter>-->
+<!--            <action android:name="android.media.browse.MediaBrowserService" />-->
+<!--        </intent-filter>-->
+<!--    </service>-->
+
     <application
+        android:name=".PdCastApplication"
         android:usesCleartextTraffic="true"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
