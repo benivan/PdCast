@@ -10,7 +10,8 @@ import com.example.pdcast.databinding.EpisodeItemsBinding
 
 class EpisodeItemAdapter(
     private val episodes: List<RssFeedResponse.EpisodeResponse>,
-    private val episodeListener: EpisodeListener
+    private val episodeListener: EpisodeListener,
+    private val episodeListAdapterListener:EpisodeListener
 ) : RecyclerView.Adapter<EpisodeItemAdapter.EpisodeItemViewHolder>() {
 
 
@@ -47,6 +48,9 @@ class EpisodeItemAdapter(
                 episodeListener.onEpisodeLongClicked(currentItem.episodeUrl ?: "")
                 true
             }
+            binding.root.setOnClickListener {
+                episodeListener.onSelectedEpisode(currentItem)
+            }
         }
 
     }
@@ -59,4 +63,5 @@ class EpisodeItemAdapter(
 interface EpisodeListener {
     fun onEpisodeClicked(url: String)
     fun onEpisodeLongClicked(url: String)
+    fun onSelectedEpisode(episodeViewData: RssFeedResponse.EpisodeResponse)
 }
