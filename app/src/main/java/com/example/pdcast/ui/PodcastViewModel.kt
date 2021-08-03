@@ -1,31 +1,58 @@
 package com.example.pdcast.ui
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.pdcast.data.api.RssFeedService
 import com.example.pdcast.data.model.PodcastModel
-import com.example.pdcast.data.repository.PodcastRepository
+import com.example.pdcast.data.response.RssFeedResponse
 import com.example.pdcast.util.Resource
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import com.example.pdcast.util.RssXmlParser
+import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import java.lang.Exception
 
 class PodcastViewModel : ViewModel() {
 
-    private val repository = PodcastRepository()
 
-    private val _podcasts = MutableStateFlow<Resource<PodcastModel>>(Resource.Loading())
+    private val _podcast = MutableSharedFlow<Resource<RssFeedResponse>>(1)
 
-    val podcasts: StateFlow<Resource<PodcastModel>> = _podcasts
+    val podcast: SharedFlow<Resource<RssFeedResponse>> = _podcast
+
+    private val rssXmlParser = RssXmlParser()
+
+    private var isFirstTime: Boolean = true
 
 
-    fun getPodcastWithTerms(term: String) {
-        viewModelScope.launch {
-            try {
-                val podcastWithTerms = repository.getPodcastWithTerms(term)
-                _podcasts.emit(Resource.Success(podcastWithTerms))
-            } catch (e: Exception) {
-                _podcasts.emit(Resource.Failure(e))
+
+
+    fun fetchXmlFromfeedUrl(it: String) {
+
+        val handler = CoroutineExceptionHandler { _, throwable ->
+            throwable.printStackTrace()
+        }
+
+        viewModelScope.launch(handler) {
+            if (isFirstTime) {
+                isFirstTime = false
+                try {
+                    _podcast.emit(Resource.Loading())
+                    val response = RssFeedService.getFeedXml(it)
+                    val parseXml = rssXmlParser.parseXml(response.byteInputStream())
+
+                    _podcast.emit(Resource.Success(parseXml))
+                } catch (e: Exception) {
+                    _podcast.emit(Resource.Failure(e))
+                }
+
             }
         }
+
+    }
+
+
+    companion object {
+        private const val TAG = "PodcastViewModel"
     }
 }
