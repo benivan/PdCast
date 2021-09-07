@@ -3,6 +3,7 @@
     package="com.example.pdcast">
 
     <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
 
 <!--    <service android:name=".MediaPlaybackService">-->
 <!--        <intent-filter>-->
@@ -26,6 +27,22 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <service android:name=".mediaPlayer.MediaPlaybackService"
+            android:exported="true"
+            android:foregroundServiceType="mediaPlayback"
+            android:enabled="true">
+            <intent-filter>
+                <action android:name="android.media.browse.MediaBrowserService"/>
+            </intent-filter>
+        </service>
+
+        <receiver
+            android:name="androidx.media.session.MediaButtonReceiver" >
+            <intent-filter>
+                <action android:name="android.intent.action.MEDIA_BUTTON" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>
