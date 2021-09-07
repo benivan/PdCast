@@ -1,28 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content">
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-
-        <TextView
-            android:id="@+id/tvTitle"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:maxLines="2"
-            style="@style/MaterialAlertDialog.MaterialComponents.Title.Text.CenterStacked"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="8dp"
-            android:padding="4dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:text="TextView" />
+    <TextView
+        android:id="@+id/tvTitle"
+        style="@style/MaterialAlertDialog.MaterialComponents.Title.Text.CenterStacked"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:padding="4dp"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/tvDescription"
+        tools:text="TextView" />
 
         <TextView
             android:id="@+id/tvDescription"
@@ -36,15 +34,22 @@
             app:layout_constraintTop_toBottomOf="@+id/tvTitle"
             tools:text="TextView" />
 
-        <Button
+        <ImageButton
             android:id="@+id/play"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
             android:layout_marginHorizontal="8dp"
-            android:text="play"
-            app:layout_constraintBaseline_toBaselineOf="@+id/tvDescription"
+            android:clickable="true"
+            android:foreground="@drawable/episode_play_button_foreground"
+            android:background="@drawable/custom_play_button"
+            android:hapticFeedbackEnabled="true"
+            app:layout_constraintBottom_toTopOf="@+id/duration"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/tvDescription" />
+            app:layout_constraintStart_toEndOf="@+id/tvDescription"
+            app:layout_constraintTop_toTopOf="parent"
+            android:src="@drawable/play_arrow_black"
+            android:focusable="true" />
+
 
         <TextView
             android:id="@+id/tvPubdate"
@@ -53,22 +58,20 @@
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
             android:maxLines="1"
-            tools:text="date"
             android:padding="4dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/tvDescription" />
+            app:layout_constraintTop_toBottomOf="@+id/tvDescription"
+            tools:text="date" />
 
         <TextView
             android:id="@+id/duration"
-            android:layout_margin="4dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            tools:text="TextView"
-            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_margin="4dp"
             app:layout_constraintBottom_toBottomOf="parent"
-             />
+            app:layout_constraintEnd_toEndOf="parent"
+            tools:text="TextView" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 
-</androidx.cardview.widget.CardView>
