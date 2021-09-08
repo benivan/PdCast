@@ -1,7 +1,10 @@
 package com.example.pdcast.ui.view
 
+
+import android.graphics.PorterDuff
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.NonNull
 import androidx.recyclerview.widget.RecyclerView
@@ -10,8 +13,7 @@ import com.example.pdcast.databinding.EpisodeItemsBinding
 
 class EpisodeItemAdapter(
     private val episodes: List<RssFeedResponse.EpisodeResponse>,
-    private val episodeListener: EpisodeListener,
-    private val episodeListAdapterListener:EpisodeListener
+    private val episodeListener: EpisodeListener
 ) : RecyclerView.Adapter<EpisodeItemAdapter.EpisodeItemViewHolder>() {
 
 
@@ -30,24 +32,26 @@ class EpisodeItemAdapter(
         return episodes.size
     }
 
+    fun removeColon(duration: String):String{
+        return if(duration.contains(":")){
+            duration.replace(":","")
+        } else duration
+    }
+
 
     inner class EpisodeItemViewHolder(private val binding: EpisodeItemsBinding) :
         RecyclerView.ViewHolder(binding.root) {
         fun bind(currentItem: RssFeedResponse.EpisodeResponse) {
             binding.tvTitle.text = currentItem.title
-            binding.tvDescription.text = currentItem.description
+            binding.tvDescription.text =
+                currentItem.description?.replace("\\<.*?\\>".toRegex(), "") ?:currentItem.description
             binding.tvPubdate.text = currentItem.pubDate
             binding.duration.text = currentItem.duration
             binding.play.setOnClickListener {
                 Log.d(TAG, "bind-Link: ${currentItem.episodeUrl}")
-                currentItem.episodeUrl?.let { it1 -> episodeListener.onEpisodeClicked(it1) }
+                episodeListener.onEpisodeClicked(currentItem)
             }
 
-            binding.root.setOnLongClickListener {
-                Log.d(TAG, "bind: ${currentItem.episodeUrl}")
-                episodeListener.onEpisodeLongClicked(currentItem.episodeUrl ?: "")
-                true
-            }
             binding.root.setOnClickListener {
                 episodeListener.onSelectedEpisode(currentItem)
             }
@@ -61,7 +65,6 @@ class EpisodeItemAdapter(
 }
 
 interface EpisodeListener {
-    fun onEpisodeClicked(url: String)
-    fun onEpisodeLongClicked(url: String)
+    fun onEpisodeClicked(episodeViewData: RssFeedResponse.EpisodeResponse)
     fun onSelectedEpisode(episodeViewData: RssFeedResponse.EpisodeResponse)
 }
