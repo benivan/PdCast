@@ -8,29 +8,104 @@
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
-    
-    
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/nav_host_fragment"
         android:name="androidx.navigation.fragment.NavHostFragment"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:defaultNavHost = "true"
-        app:navGraph ="@navigation/nav_graph"
-        app:layout_constraintBottom_toTopOf="@+id/bottom_navigation"
+        app:defaultNavHost="true"
+        app:layout_constraintBottom_toTopOf="@+id/bottomPlayerLayout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
+        app:layout_constraintTop_toTopOf="parent"
+        app:navGraph="@navigation/nav_graph" />
 
-    <com.google.android.exoplayer2.ui.PlayerView
-        android:id="@+id/mainPlayer"
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/bottomPlayerLayout"
         android:layout_width="match_parent"
-        android:layout_height="50dp"
-        app:layout_constraintBottom_toTopOf="@+id/bottom_navigation"/>
+        android:layout_height="wrap_content"
+        android:background="@color/white"
+        app:layout_constraintBottom_toTopOf="@id/bottom_navigation"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <ImageView
+            android:id="@+id/bottomPlayImage"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:foregroundGravity="center"
+            android:src="@drawable/ic_home"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            tools:srcCompat="@tools:sample/avatars" />
+
+        <ImageButton
+            android:id="@+id/playPauseButton"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_gravity="center"
+            android:layout_marginTop="4dp"
+            android:background="@drawable/play_button_background"
+            android:clickable="true"
+            android:foreground="@drawable/episode_play_button_foreground"
+            android:src="@drawable/play_arrow_black"
+            android:text="play"
+            app:layout_constraintLeft_toRightOf="@+id/preButton"
+            app:layout_constraintRight_toLeftOf="@id/forButton"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+
+            />
+
+        <ImageButton
+            android:id="@+id/preButton"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_gravity="center"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="4dp"
+            android:background="@drawable/custom_circular_transparent_backgroung"
+            android:clickable="true"
+            android:foreground="@drawable/episode_play_button_foreground"
+            android:src="@drawable/rewind_button"
+            android:text="pre"
+            app:layout_constraintLeft_toRightOf="@+id/bottomPlayImage"
+            app:layout_constraintRight_toLeftOf="@id/playPauseButton"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+
+        <ImageButton
+            android:id="@+id/forButton"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_gravity="center"
+            android:layout_marginTop="4dp"
+            android:background="@drawable/custom_circular_transparent_backgroung"
+            android:clickable="true"
+            android:foreground="@drawable/episode_play_button_foreground"
+            android:src="@drawable/forward_buttoon"
+            app:layout_constraintLeft_toRightOf="@id/playPauseButton"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/bottomPlayerGuidedLine"/>
+
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/bottomPlayerGuidedLine"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_end="88dp" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_navigation"
@@ -38,5 +113,6 @@
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent"
         app:menu="@menu/bottom_nav_menu" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
