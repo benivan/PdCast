@@ -7,8 +7,12 @@
 
     <fragment
         android:id="@+id/homeFragment"
-        android:name="com.example.pdcast.ui.view.HomeScreen"
-        tools:layout="@layout/fragment_home_screen" />
+        android:name="com.example.pdcast.ui.view.HomeScreenFragment"
+        tools:layout="@layout/fragment_home_screen" >
+        <action
+            android:id="@+id/action_homeFragment_to_podcastDetailAndEpisodeFragment"
+            app:destination="@id/podcastDetailAndEpisodeFragment" />
+    </fragment>
     <fragment
         android:id="@+id/searchFragment"
         android:name="com.example.pdcast.ui.view.SearchFragment"
@@ -39,6 +43,15 @@
         <argument
             android:name="link"
             app:argType="string" />
+    </fragment>
+    <fragment
+        android:id="@+id/playerFragment"
+        android:name="com.example.pdcast.ui.view.PlayerFragment"
+        tools:layout="@layout/fragment_player" />
+    <fragment android:id="@+id/placeholder" >
+        <action
+            android:id="@+id/action_placeholder_to_homeFragment"
+            app:destination="@id/homeFragment" />
     </fragment>
 
 </navigation>
