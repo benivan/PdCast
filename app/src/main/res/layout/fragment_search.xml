@@ -10,7 +10,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-
         <TextView
             android:id="@+id/textView"
             android:layout_width="wrap_content"
@@ -37,43 +36,42 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_marginTop="10dp"
-            tools:listitem="@layout/podcast_search_view_item"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/progressBar"
-            app:layout_goneMarginTop="20dp" />
+            app:layout_goneMarginTop="20dp"
+            tools:listitem="@layout/podcast_search_view_item" />
 
         <EditText
-            android:layout_marginHorizontal="12dp"
             android:id="@+id/searchTextInput"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="50dp"
+            android:layout_marginStart="12dp"
             android:ems="10"
-            android:hint="Search Podcast"
             android:imeOptions="actionSearch"
             android:inputType="textPersonName"
             app:layout_constraintEnd_toStartOf="@+id/btnSearch"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toTopOf="@+id/recyclerView"/>
 
-        <Button
+        <ImageButton
             android:id="@+id/btnSearch"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="4dp"
-            android:layout_marginTop="50dp"
+            android:layout_marginHorizontal="8dp"
+            android:background="@android:drawable/ic_menu_search"
             android:text="Search"
-            app:layout_constraintBaseline_toBaselineOf="@+id/searchTextInput"
+            app:layout_constraintBottom_toTopOf="@+id/recyclerView"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:layout_margin="4dp"
             android:id="@+id/floatingActionButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_margin="4dp"
             android:clickable="true"
             android:src="@drawable/ic_arrow_upward"
             app:layout_constraintBottom_toBottomOf="parent"

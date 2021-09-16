@@ -4,20 +4,39 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context=".ui.view.HomeScreen">
+    tools:context=".ui.view.HomeScreenFragment">
 <androidx.constraintlayout.widget.ConstraintLayout
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <TextView
-        android:id="@+id/button"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/homeFragmentRecyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:listitem="@layout/home_fragment_podcast_image_item"
+         />
+
+    <ProgressBar
+        android:id="@+id/homeScreenProgressBar"
+        style="?android:attr/progressBarStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Home"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        />
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/errorMessage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="TextView"
+        app:layout_constraintBottom_toBottomOf="@id/homeScreenProgressBar"
+        app:layout_constraintEnd_toStartOf="@id/homeScreenProgressBar"
+        app:layout_constraintStart_toStartOf="@id/homeScreenProgressBar"
+        app:layout_constraintTop_toTopOf="@id/homeScreenProgressBar" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
 
