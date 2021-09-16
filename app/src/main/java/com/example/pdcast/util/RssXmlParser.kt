@@ -16,6 +16,8 @@ class RssXmlParser {
 
 
     private val ns: String? = null
+    private var episodeImageUrl: String? = null
+    private var podcastName:String? =null
 
     @Throws(XmlPullParserException::class, IOException::class)
     fun parse(inputStream: InputStream): RssFeedResponse = inputStream.use { inputStream ->
@@ -29,13 +31,11 @@ class RssXmlParser {
     @OptIn(ExperimentalCoroutinesApi::class)
     suspend fun parseXml(inputStream: InputStream): RssFeedResponse =
         suspendCancellableCoroutine {
-
             inputStream.use { inputStream ->
                 val parser: XmlPullParser = Xml.newPullParser()
                 parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false)
                 parser.setInput(inputStream, null)
                 parser.nextTag()
-                // Value
                 try {
                     it.resume(readFeed(parser))
                 } catch (e: Exception) {
@@ -54,7 +54,6 @@ class RssXmlParser {
             if (parser.eventType != XmlPullParser.START_TAG) {
                 continue
             }
-//            Log.d(TAG, "readFeed: ${parser.name}")
             when (parser.name) {
                 "channel" -> rssFeedResponse = readEntry(parser)
                 "item" -> rssFeedResponse.episodes.add(readItem(parser))
@@ -91,8 +90,8 @@ class RssXmlParser {
 
                 else -> skip(parser)
             }
-
         }
+        podcastName = title
         return RssFeedResponse(title, description, language, link, imageUrl, episodes)
     }
 
@@ -163,6 +162,7 @@ class RssXmlParser {
                 "url" -> imageUrl = readIUrl(parser)
             }
         }
+        episodeImageUrl = imageUrl
         return imageUrl
     }
 
@@ -181,7 +181,6 @@ class RssXmlParser {
         parser.require(XmlPullParser.START_TAG, ns, "pubDate")
         val pubDate = readText(parser)
         parser.require(XmlPullParser.END_TAG, ns, "pubDate")
-
         return pubDate
     }
 
@@ -213,6 +212,7 @@ class RssXmlParser {
         var pubDate: String? = null
         var episodeUrl: String? = null
         var duration: String? = null
+        var imageUrl = episodeImageUrl
 
         while (parser.next() != XmlPullParser.END_TAG) {
             if (parser.eventType != XmlPullParser.START_TAG) {
@@ -228,8 +228,7 @@ class RssXmlParser {
                 else -> skip(parser)
             }
         }
-
-        return RssFeedResponse.EpisodeResponse(title, link, description, pubDate,duration,episodeUrl)
+        return RssFeedResponse.EpisodeResponse(title, link, description, pubDate,duration,episodeUrl,imageUrl,podcastName)
     }
 
     @Throws(XmlPullParserException::class, IOException::class)
@@ -237,6 +236,11 @@ class RssXmlParser {
         parser.require(XmlPullParser.START_TAG, ns, "itunes:duration")
         val durationTime = readText(parser)
         parser.require(XmlPullParser.END_TAG, ns, "itunes:duration")
+        fun removeColon(duration: String):String{
+            return if(duration.contains(":")){
+                duration.replace(":","")
+            } else duration
+        }
         return durationTime
     }
 
@@ -253,9 +257,7 @@ class RssXmlParser {
         }
         parser.nextTag()
         return episodeUrl
-
     }
-
 
     companion object {
         private const val TAG = "RssXmlParser"
