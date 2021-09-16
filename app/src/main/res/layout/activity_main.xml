@@ -37,6 +37,7 @@
         app:layout_constraintStart_toStartOf="parent">
 
         <ImageView
+            android:layout_marginLeft="8dp"
             android:id="@+id/bottomPlayImage"
             android:layout_width="50dp"
             android:layout_height="50dp"
