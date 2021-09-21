@@ -1,9 +1,130 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ui.view.PlayerFragment">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/podcastImage"
+            android:layout_width="match_parent"
+            android:layout_height="400dp"
+            android:layout_marginHorizontal="8dp"
+            android:layout_marginTop="16dp"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:shapeAppearanceOverlay="@style/ImageStyle"></com.google.android.material.imageview.ShapeableImageView>
+
+        <TextView
+            android:id="@+id/podcastEpisodeName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="40dp"
+            android:text="TextView"
+            android:textSize="18sp"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/podcastImage" />
+
+        <TextView
+            android:id="@+id/PodcastName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="TextView"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/podcastEpisodeName" />
+
+        <SeekBar
+            android:id="@+id/playerSeekBar"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            app:layout_constraintTop_toBottomOf="@+id/PodcastName"
+            app:layout_constraintLeft_toRightOf="@+id/startDuration"
+            app:layout_constraintRight_toLeftOf="@id/endDuration"
+            />
+
+        <ImageButton
+            android:id="@+id/playerPreButton"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_gravity="center"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/custom_circular_transparent_backgroung"
+            android:clickable="true"
+            android:foreground="@drawable/episode_play_button_foreground"
+            android:src="@drawable/rewind_button"
+            android:text="pre"
+            app:layout_constraintBottom_toBottomOf="@+id/playerPlayPauseButton"
+            app:layout_constraintEnd_toStartOf="@+id/playerPlayPauseButton"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/playerSeekBar" />
+
+        <ImageButton
+            android:id="@+id/playerPlayPauseButton"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_gravity="center"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/play_button_background"
+            android:clickable="true"
+            android:foreground="@drawable/episode_play_button_foreground"
+            android:src="@drawable/play_arrow_black"
+            android:text="play"
+            app:layout_constraintEnd_toStartOf="@+id/playerForButton"
+            app:layout_constraintStart_toEndOf="@+id/playerPreButton"
+            app:layout_constraintTop_toBottomOf="@id/playerSeekBar" />
+
+        <ImageButton
+            android:id="@+id/playerForButton"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_gravity="center"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/custom_circular_transparent_backgroung"
+            android:clickable="true"
+            android:foreground="@drawable/episode_play_button_foreground"
+            android:src="@drawable/forward_buttoon"
+            app:layout_constraintBottom_toBottomOf="@+id/playerPlayPauseButton"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/playerPlayPauseButton"
+            app:layout_constraintTop_toBottomOf="@id/playerSeekBar" />
+
+        <TextView
+            android:id="@+id/startDuration"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:text="00:00"
+            app:layout_constraintBottom_toBottomOf="@+id/playerSeekBar"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toLeftOf="@+id/playerSeekBar"
+            app:layout_constraintTop_toTopOf="@id/playerSeekBar"
+             />
+
+        <TextView
+            android:id="@+id/endDuration"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="4dp"
+            android:text="00:00"
+            app:layout_constraintBottom_toBottomOf="@+id/playerSeekBar"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintLeft_toRightOf="@id/playerSeekBar"
+            app:layout_constraintTop_toTopOf="@id/playerSeekBar"
+             />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 
 </FrameLayout>
