@@ -11,17 +11,23 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.pdcast.data.model.PodcastDataBaseModel
 import com.example.pdcast.databinding.FragmentSearchBinding
+import com.example.pdcast.ui.MainPodcastViewModel
 import com.example.pdcast.ui.PodcastsSearchViewModel
+import com.example.pdcast.util.DataMapper
 import com.example.pdcast.util.Resource
 import com.example.pdcast.util.hideKeyboard
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 
 
 class SearchFragment : Fragment() {
 
     private val viewModel: PodcastsSearchViewModel by viewModels()
+    private val mainPodcastViewModel:MainPodcastViewModel by viewModels()
 
     private var _binding: FragmentSearchBinding? = null
     private val binding: FragmentSearchBinding get() = _binding!!
@@ -44,11 +50,9 @@ class SearchFragment : Fragment() {
         binding.textView.visibility = View.GONE
         binding.progressBar.visibility = View.GONE
         binding.floatingActionButton.visibility = View.GONE
-
         binding.btnSearch.setOnClickListener {
             viewModel.getPodcastWithTerms(binding.searchTextInput.text.toString())
         }
-
 
 
         viewModel.podcasts
@@ -65,6 +69,14 @@ class SearchFragment : Fragment() {
                         binding.textView.visibility = View.GONE
                     }
                     is Resource.Success -> {
+                        val dataMapper = DataMapper()
+
+//                        lifecycleScope.launch(Dispatchers.IO) {
+//                          it.data.results.forEach {itunesData ->
+//                                mainPodcastViewModel.addPodcast(dataMapper.mapModelToEntity(itunesData))
+//                            }
+//                        }
+
                         binding.textView.visibility = View.GONE
                         binding.progressBar.visibility = View.GONE
                         binding.recyclerView.adapter =
@@ -78,8 +90,10 @@ class SearchFragment : Fragment() {
                                         binding.floatingActionButton.visibility = View.GONE
                                     }
                                 },
-                                newlistener = {
-                                    Log.d(TAG, "onViewCreated: $it")
+                                subscribeButtonListener = {itunesPodcast ->
+                                    lifecycleScope.launch(Dispatchers.IO) {
+                                        mainPodcastViewModel.addPodcast(dataMapper.mapModelToEntity(itunesPodcast))
+                                    }
                                 })
                         val layoutManager = LinearLayoutManager(requireContext())
 
