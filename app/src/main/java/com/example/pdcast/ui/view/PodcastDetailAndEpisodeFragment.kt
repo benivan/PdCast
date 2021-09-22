@@ -1,6 +1,8 @@
 package com.example.pdcast.ui.view
 
 import android.content.ComponentName
+import android.content.Context
+import android.media.MediaMetadata
 import android.net.Uri
 import android.os.Bundle
 import android.support.v4.media.MediaBrowserCompat
@@ -113,12 +115,12 @@ class PodcastDetailAndEpisodeFragment : Fragment() {
                                         PlaybackStateCompat.STATE_PLAYING
                                     ) {
 //                                        controller.transportControls.pause()
-                                        viewModel.startPlaying(episodeViewData, activity)
+                                        startPlaying(episodeViewData, activity)
                                     } else if (controller.playbackState.state == PlaybackStateCompat.STATE_PAUSED) {
-                                        viewModel.startPlaying(episodeViewData, activity)
+                                        startPlaying(episodeViewData, activity)
                                     }
                                 } else {
-                                    viewModel.startPlaying(episodeViewData, activity)
+                                    startPlaying(episodeViewData, activity)
                                 }
                             }
 
@@ -135,6 +137,61 @@ class PodcastDetailAndEpisodeFragment : Fragment() {
             }
         }.launchIn(lifecycleScope)
     }
+
+    fun startPlaying(episodeViewData: RssFeedResponse.EpisodeResponse,fragmentActivity: FragmentActivity) {
+//        val fragmentActivity = activity as FragmentActivity
+
+        val sharedPref = fragmentActivity.getSharedPreferences(
+            "SharePreferencePdCast", Context.MODE_PRIVATE
+        )
+        with(sharedPref.edit()) {
+            putBoolean("IsPlayedBefore",true)
+            putString("NowPlayingMediaLink",episodeViewData.episodeUrl)
+            putString("NowPlayingMediaImage", episodeViewData.imageUrl)
+            putLong("NowPlayingPosition", 0L)
+            putString("NowPlyingPodcastName",episodeViewData.title)
+            putString("NowPlyingPodcastEpisodeName",episodeViewData.podcastName)
+            apply()
+        }
+
+        fun removeColon(duration: String):Long{
+            return if(duration.contains(":")){
+                duration.replace(":","").toLong()
+            } else duration.toLong()
+        }
+
+        val controller = MediaControllerCompat.getMediaController(fragmentActivity)
+
+        val bundle = Bundle()
+
+        bundle.putString(
+            MediaMetadataCompat.METADATA_KEY_TITLE,
+            episodeViewData.podcastName
+        )
+
+        bundle.putString(
+            MediaMetadataCompat.METADATA_KEY_ARTIST,
+            episodeViewData.title
+        )
+        bundle.putString(
+            MediaMetadataCompat.METADATA_KEY_ALBUM_ART_URI,
+            episodeViewData.imageUrl
+        )
+
+        episodeViewData.duration?.let { removeColon(it) }?.let {
+            bundle.putLong(
+                MediaMetadata.METADATA_KEY_DURATION,
+                it
+            )
+        }
+
+        controller.transportControls.playFromUri(
+            Uri.parse(episodeViewData.episodeUrl),
+            bundle
+        )
+        Log.d(TAG, "startPlaying: This is called ${episodeViewData.episodeUrl} HERE WE GOOOO!!")
+    }
+
 
 
 
