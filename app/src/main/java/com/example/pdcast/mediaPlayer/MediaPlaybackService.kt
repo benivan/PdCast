@@ -254,6 +254,18 @@ class MediaPlaybackService : MediaBrowserServiceCompat(), PdCastMediaCallback.Po
     override fun onStopPlaying() {
         stopSelf()
         stopForeground(true)
+        val controller = mediaSession.controller
+
+        if (controller.playbackState != null) {
+            val sharedPref = this.getSharedPreferences(
+                getString(R.string.preference_file_key), Context.MODE_PRIVATE
+            )
+            with(sharedPref.edit()) {
+                putLong("NowPlayingPosition", controller.playbackState.position)
+                apply()
+            }
+        }
+
     }
 
     override fun onPausePlaying() {
