@@ -6,6 +6,12 @@
             10%
         </item>
     </style>
+
+    <style name="FragmentPlayerImageStyle">
+        <item name="cornerSize">
+            1%
+        </item>
+    </style>
     
     <style name="BottomSheetDialogTheme" parent="Theme.Design.BottomSheetDialog">
         <item name="bottomSheetStyle">@style/BottomSheetStyle</item>
