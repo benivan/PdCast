@@ -1,3 +1,3 @@
 # PdCast
-medial player app
-Podcast App.
+Medial player app
+
