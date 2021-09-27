@@ -149,8 +149,8 @@ class PodcastDetailAndEpisodeFragment : Fragment() {
             putString("NowPlayingMediaLink",episodeViewData.episodeUrl)
             putString("NowPlayingMediaImage", episodeViewData.imageUrl)
             putLong("NowPlayingPosition", 0L)
-            putString("NowPlyingPodcastName",episodeViewData.title)
-            putString("NowPlyingPodcastEpisodeName",episodeViewData.podcastName)
+            putString("NowPlyingPodcastName",episodeViewData.podcastName)
+            putString("NowPlyingPodcastEpisodeName",episodeViewData.title)
             apply()
         }
 
