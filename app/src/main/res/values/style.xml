@@ -9,7 +9,7 @@
 
     <style name="FragmentPlayerImageStyle">
         <item name="cornerSize">
-            1%
+            0%
         </item>
     </style>
     
