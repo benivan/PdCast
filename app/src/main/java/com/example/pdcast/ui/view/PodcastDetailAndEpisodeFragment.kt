@@ -127,7 +127,6 @@ class PodcastDetailAndEpisodeFragment : Fragment() {
                             override fun onSelectedEpisode(episodeViewData: RssFeedResponse.EpisodeResponse) {
                             }
                         })
-
                     binding.rvEpisode.layoutManager = LinearLayoutManager(requireContext())
 
                 }
@@ -148,6 +147,7 @@ class PodcastDetailAndEpisodeFragment : Fragment() {
             putBoolean("IsPlayedBefore",true)
             putString("NowPlayingMediaLink",episodeViewData.episodeUrl)
             putString("NowPlayingMediaImage", episodeViewData.imageUrl)
+            putString("NowPlayingEpisodeDuration",episodeViewData.duration)
             putLong("NowPlayingPosition", 0L)
             putString("NowPlyingPodcastName",episodeViewData.podcastName)
             putString("NowPlyingPodcastEpisodeName",episodeViewData.title)
