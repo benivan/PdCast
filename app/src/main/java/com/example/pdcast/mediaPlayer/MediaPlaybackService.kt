@@ -15,12 +15,14 @@ import android.support.v4.media.MediaDescriptionCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
+import android.util.LruCache
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.media.MediaBrowserServiceCompat
 import androidx.media.app.NotificationCompat as NotificationCompatX
 import androidx.media.session.MediaButtonReceiver
+import com.bumptech.glide.load.engine.cache.MemoryCache
 import com.example.pdcast.MainActivity
 import com.example.pdcast.R
 import com.google.android.exoplayer2.ext.mediasession.MediaSessionConnector
@@ -34,6 +36,7 @@ class MediaPlaybackService : MediaBrowserServiceCompat(), PdCastMediaCallback.Po
     private val serviceJob = Job()
     private val serviceScope = CoroutineScope(Dispatchers.Main + serviceJob)
 
+    private lateinit var memoryCache: LruCache<String, Bitmap>
 
     private lateinit var mediaSession: MediaSessionCompat
     private lateinit var mediaSessionConnector: MediaSessionConnector
@@ -57,6 +60,15 @@ class MediaPlaybackService : MediaBrowserServiceCompat(), PdCastMediaCallback.Po
         val callBack = PdCastMediaCallback(this, mediaSession)
         callBack.listener = this
         mediaSession.setCallback(callBack)
+
+        val maxMemory = (Runtime.getRuntime().maxMemory() / 1024).toInt()
+        val cacheSize = maxMemory / 8
+
+        memoryCache = object : LruCache<String, Bitmap>(cacheSize) {
+            override fun sizeOf(key: String?, value: Bitmap?): Int {
+                return value!!.byteCount / 1024
+            }
+        }
 
     }
 
@@ -107,7 +119,6 @@ class MediaPlaybackService : MediaBrowserServiceCompat(), PdCastMediaCallback.Po
         )
         return Pair(pauseAction, playAction)
     }
-
 
 
     private fun isPlaying(): Boolean {
@@ -206,13 +217,21 @@ class MediaPlaybackService : MediaBrowserServiceCompat(), PdCastMediaCallback.Po
             createNotificationChannel()
         }
         CoroutineScope(Dispatchers.IO).launch {
-            val bitmap = mediaDescription.iconUri?.let {
-                URL(it.toString()).openStream().use { stream ->
-                    BitmapFactory.decodeStream(stream)
+            if (getBitMapFromMemoryCache(mediaDescription.iconUri.toString()) == null) {
+                val bitmap = mediaDescription.iconUri?.let {
+                    URL(it.toString()).openStream().use { stream ->
+                        BitmapFactory.decodeStream(stream)
+                    }
+
                 }
+                bitmap?.let { setBitMapToMemoryCache(mediaDescription.iconUri.toString(), bitmap) }
             }
 
-            val notification = createNotification(mediaDescription, bitmap)
+
+            val notification = createNotification(
+                mediaDescription,
+                getBitMapFromMemoryCache(mediaDescription.iconUri.toString())
+            )
 
             ContextCompat.startForegroundService(
                 this@MediaPlaybackService,
@@ -289,5 +308,16 @@ class MediaPlaybackService : MediaBrowserServiceCompat(), PdCastMediaCallback.Po
         }
         sendBroadcast(intent)
     }
+
+    private fun getBitMapFromMemoryCache(key: String): Bitmap? {
+        return memoryCache.get(key)
+    }
+
+    private fun setBitMapToMemoryCache(key: String, bitmap: Bitmap) {
+        if (getBitMapFromMemoryCache(key) == null) {
+            memoryCache.put(key, bitmap)
+        }
+    }
+
 
 }
