@@ -11,11 +11,8 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
 import com.example.pdcast.R
-import com.example.pdcast.data.model.ItunesPodcast
 import com.example.pdcast.databinding.FragmentPlayerBinding
-import com.example.pdcast.mediaPlayer.MediaPlaybackService
-import com.example.pdcast.ui.PlayerVIewModel
-import com.example.pdcast.util.PState
+import com.example.pdcast.ui.MainViewModel
 import com.google.android.material.transition.MaterialFadeThrough
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -26,7 +23,7 @@ class PlayerFragment : Fragment() {
     private val binding:FragmentPlayerBinding get() = _binding!!
 
 
-    private val vIewModel:PlayerVIewModel by activityViewModels()
+    private val vIewModel:MainViewModel by activityViewModels()
 
 
     override fun onCreateView(
