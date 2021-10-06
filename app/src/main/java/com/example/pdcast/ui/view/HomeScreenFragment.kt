@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import com.example.pdcast.databinding.FragmentHomeScreenBinding
 import com.example.pdcast.ui.MainPodcastViewModel
 import com.example.pdcast.util.DataMapper
+import com.google.android.material.transition.MaterialFadeThrough
 import kotlinx.coroutines.flow.onEach
 
 
@@ -36,6 +37,9 @@ class HomeScreenFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        enterTransition = MaterialFadeThrough()
+        exitTransition = MaterialFadeThrough()
 
         val dataMapper = DataMapper()
 
