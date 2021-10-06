@@ -1,13 +1,8 @@
 package com.example.pdcast.data.repository
 
-import android.util.Log
 import com.example.pdcast.data.api.ItunesService
-import com.example.pdcast.data.api.RssFeedService
-import com.example.pdcast.data.dao.PodcastSubscribeDao
 import com.example.pdcast.data.model.ItunesPodcast
-import com.example.pdcast.data.model.PodcastModel
-import com.example.pdcast.data.response.PodcastResponse
-import kotlin.random.Random
+import com.example.pdcast.data.model.Podcast
 
 class ItunesPodcastRepository() {
 
@@ -16,7 +11,7 @@ class ItunesPodcastRepository() {
 
     suspend fun getPodcastWithTerms(
         term: String
-    ): PodcastModel {
+    ): Podcast {
         val searchPodcastByTerms = podcastService.searchPodcastByTerms(term)
         val toList = searchPodcastByTerms.results.map {
             ItunesPodcast(
@@ -27,7 +22,7 @@ class ItunesPodcastRepository() {
                 releaseDate = it.releaseDate
             )
         }.toList()
-        return PodcastModel(searchPodcastByTerms.resultCount, toList)
+        return Podcast(searchPodcastByTerms.resultCount, toList)
     }
 
     companion object {

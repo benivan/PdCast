@@ -4,7 +4,7 @@ import androidx.room.AutoMigration
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
-data class PodcastModel(
+data class Podcast(
     val resultCount: Int,
     val results: List<ItunesPodcast>
 )
