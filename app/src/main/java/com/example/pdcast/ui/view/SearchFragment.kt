@@ -116,7 +116,7 @@ class SearchFragment : Fragment() {
             }.launchIn(lifecycleScope)
 
 
-        binding.searchTextInput.setOnEditorActionListener { v, actionId, event ->
+        binding.searchTextInput.setOnEditorActionListener { _, actionId, _ ->
             if (EditorInfo.IME_ACTION_SEARCH == actionId) {
                 viewModel.getPodcastWithTerms(binding.searchTextInput.text.toString())
                 requireActivity().hideKeyboard()
