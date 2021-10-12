@@ -1,12 +1,11 @@
 package com.example.pdcast.util
 
 import com.example.pdcast.data.model.ItunesPodcast
-import com.example.pdcast.data.model.PodcastDataBaseModel
-import java.util.*
+import com.example.pdcast.data.dto.DBPodcast
 
-class DataMapper : Mapper<PodcastDataBaseModel, ItunesPodcast> {
-    override fun mapModelToEntity(model: ItunesPodcast): PodcastDataBaseModel {
-        return PodcastDataBaseModel(
+class DataMapper : Mapper<DBPodcast, ItunesPodcast> {
+    override fun mapModelToEntity(model: ItunesPodcast): DBPodcast {
+        return DBPodcast(
             collectionCensoredName = model.collectionCensoredName,
             feedUrl = model.feedUrl,
             artworkUrl100 = model.artworkUrl100,
@@ -16,7 +15,7 @@ class DataMapper : Mapper<PodcastDataBaseModel, ItunesPodcast> {
 
     }
 
-    override fun mapEntityToModel(entity: PodcastDataBaseModel): ItunesPodcast {
+    override fun mapEntityToModel(entity: DBPodcast): ItunesPodcast {
         return ItunesPodcast(
             collectionCensoredName = entity.collectionCensoredName,
             feedUrl = entity.feedUrl,
