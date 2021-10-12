@@ -86,13 +86,24 @@ class RssXmlParser {
                 "description" -> description = readDescription(parser)
                 "link" -> link = readLink(parser)
                 "language" -> language = readLanguage(parser)
-                "image" -> imageUrl = readImageUrl(parser)
-
+                "itunes:image" -> imageUrl = readItunesImage(parser)
                 else -> skip(parser)
             }
         }
         podcastName = title
         return RssFeedResponse(title, description, language, link, imageUrl, episodes)
+    }
+
+    @Throws(IOException::class, XmlPullParserException::class)
+    private fun readItunesImage(parser: XmlPullParser): String? {
+        parser.require(XmlPullParser.START_TAG, ns, "itunes:image")
+        var imageUrl: String? = null
+
+            if (parser.getAttributeName(0) == "href") {
+                imageUrl = parser.getAttributeValue(0)
+            }
+        episodeImageUrl = imageUrl
+        return imageUrl
     }
 
 
@@ -241,7 +252,7 @@ class RssXmlParser {
                 duration.replace(":","")
             } else duration
         }
-        return durationTime
+        return removeColon(durationTime)
     }
 
     @Throws(XmlPullParserException::class, IOException::class)
