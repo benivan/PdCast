@@ -10,7 +10,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.pdcast.data.model.ItunesPodcast
 import com.example.pdcast.databinding.PodcastSearchViewItemBinding
-import com.example.pdcast.ui.MainPodcastViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
@@ -33,7 +32,7 @@ class SearchItemAdapter(
     override fun onBindViewHolder(holder: SearchItemViewHolder, position: Int) {
         val currentItem = podcasts[position]
         listener(position)
-        holder.bind(currentItem,position)
+        holder.bind(currentItem)
     }
 
     override fun getItemCount(): Int {
@@ -45,19 +44,20 @@ class SearchItemAdapter(
     inner class SearchItemViewHolder(
         private val itemBinding: PodcastSearchViewItemBinding,
     ) : RecyclerView.ViewHolder(itemBinding.root) {
-        fun bind(currentItem: ItunesPodcast, position: Int) {
+        fun bind(currentItem: ItunesPodcast) {
 
-            Glide.with(itemView).load(currentItem.artworkUrl30).into(itemBinding.ivPicture)
+            Glide.with(itemBinding.ivPicture).load(currentItem.artworkUrl100).into(itemBinding.ivPicture)
 
             itemBinding.tvHeading.text = currentItem.collectionCensoredName
 
             itemBinding.tvHeading.setOnClickListener {
-                Log.d(TAG, "feedLink${currentItem.feedUrl}")
+                Log.d(TAG, "${currentItem.feedUrl}")
                     val action = SearchFragmentDirections.actionSearchFragmentToPodcastDetailAndEpisodeFragment(currentItem.feedUrl)
                     it.findNavController().navigate(action)
             }
 
             itemBinding.ivPicture.setOnClickListener {
+                Log.d(TAG, "${currentItem.feedUrl}")
                 val action = SearchFragmentDirections.actionSearchFragmentToPodcastDetailAndEpisodeFragment(currentItem.feedUrl)
                 it.findNavController().navigate(action)
             }
@@ -81,6 +81,3 @@ class SearchItemAdapter(
 }
 
 
-interface OnPositionChange{
-    fun changesPosition(position: Int)
-}
