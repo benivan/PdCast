@@ -10,8 +10,6 @@
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-
-
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
@@ -79,6 +77,7 @@
                 android:layout_marginHorizontal="8dp"
                 android:nestedScrollingEnabled="false"
                 app:layout_constraintBottom_toBottomOf="parent"
+                android:layoutAnimation="@anim/layout_animation"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/tvDescription"
@@ -105,6 +104,22 @@
                 app:layout_constraintEnd_toEndOf="@+id/progressBarEpisodePage"
                 app:layout_constraintStart_toStartOf="@+id/progressBarEpisodePage"
                 app:layout_constraintTop_toTopOf="@+id/progressBarEpisodePage" />
+
+            <Button
+                android:id="@+id/podcastSubscribeButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:text="Subscribe"
+                android:textSize="14sp"
+                android:clickable="true"
+                android:hapticFeedbackEnabled="true"
+                app:layout_constraintBottom_toBottomOf="@id/guideline"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintLeft_toRightOf="@id/imageView"
+                android:background="@drawable/custom_subscribe_button"
+                android:foreground="@drawable/custom_subscribe_button_foreground"
+                app:layout_constraintTop_toTopOf="@id/guideline" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.core.widget.NestedScrollView>
 </FrameLayout>
