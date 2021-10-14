@@ -4,16 +4,13 @@ import android.os.Bundle
 import android.util.Log
 import android.view.*
 import android.view.inputmethod.EditorInfo
-import androidx.activity.addCallback
-import androidx.core.graphics.toColor
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.pdcast.data.model.PodcastDataBaseModel
 import com.example.pdcast.databinding.FragmentSearchBinding
-import com.example.pdcast.ui.MainPodcastViewModel
+import com.example.pdcast.ui.MainViewModel
 import com.example.pdcast.ui.PodcastsSearchViewModel
 import com.example.pdcast.util.DataMapper
 import com.example.pdcast.util.Resource
@@ -27,7 +24,7 @@ import kotlinx.coroutines.launch
 class SearchFragment : Fragment() {
 
     private val viewModel: PodcastsSearchViewModel by viewModels()
-    private val mainPodcastViewModel:MainPodcastViewModel by viewModels()
+    private val mainPodcastViewModel: MainViewModel by viewModels()
 
     private var _binding: FragmentSearchBinding? = null
     private val binding: FragmentSearchBinding get() = _binding!!
