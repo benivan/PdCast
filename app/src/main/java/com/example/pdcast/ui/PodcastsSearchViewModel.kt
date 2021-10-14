@@ -2,8 +2,11 @@ package com.example.pdcast.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.pdcast.data.model.PodcastModel
+import com.example.pdcast.data.dao.PodcastSubscribeDao
+import com.example.pdcast.data.dto.DBPodcast
+import com.example.pdcast.data.model.Podcast
 import com.example.pdcast.data.repository.ItunesPodcastRepository
+import com.example.pdcast.data.repository.PodcastRepository
 import com.example.pdcast.util.Resource
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -11,11 +14,14 @@ import kotlinx.coroutines.flow.StateFlow
 
 class PodcastsSearchViewModel : ViewModel() {
 
+
     private val repository = ItunesPodcastRepository()
 
-    private val _podcasts = MutableStateFlow<Resource<PodcastModel>>(Resource.None())
 
-    val podcasts: StateFlow<Resource<PodcastModel>> = _podcasts
+
+    private val _podcasts = MutableStateFlow<Resource<Podcast>>(Resource.None())
+
+    val podcasts: StateFlow<Resource<Podcast>> = _podcasts
 
     private var itemPosition:Int = 0
 
@@ -41,7 +47,8 @@ class PodcastsSearchViewModel : ViewModel() {
             }
         }
     }
-    
+
+
 
     companion object {
         private const val TAG = "PodcastViewModel"
