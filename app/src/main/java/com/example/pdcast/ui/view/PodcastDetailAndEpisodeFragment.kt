@@ -1,6 +1,5 @@
 package com.example.pdcast.ui.view
 
-import android.content.ComponentName
 import android.content.Context
 import android.media.MediaMetadata
 import android.net.Uri
@@ -8,7 +7,6 @@ import android.os.Bundle
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaControllerCompat
-import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -21,21 +19,18 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.example.pdcast.data.dto.DBPodcast
+import com.example.pdcast.data.dto.DBPodcastsEpisodes
+import com.example.pdcast.data.dto.DBRssFeedPodcast
 import com.example.pdcast.data.response.RssFeedResponse
 import com.example.pdcast.databinding.FragmentPodcastDetailAndEpisodeBinding
-import com.example.pdcast.mediaPlayer.MediaPlaybackService
-import com.example.pdcast.ui.PlayerVIewModel
+import com.example.pdcast.ui.MainViewModel
 import com.example.pdcast.ui.PodcastViewModel
 import com.example.pdcast.util.Resource
 import kotlinx.coroutines.CoroutineExceptionHandler
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
-import kotlin.coroutines.suspendCoroutine as suspendCoroutine
 
 
 class PodcastDetailAndEpisodeFragment : Fragment() {
@@ -45,7 +40,7 @@ class PodcastDetailAndEpisodeFragment : Fragment() {
 
     private val viewModel: PodcastViewModel by viewModels()
 
-    private val playerViewModel: PlayerVIewModel by activityViewModels()
+    private val mainViewModel: MainViewModel by activityViewModels()
 
     private var _binding: FragmentPodcastDetailAndEpisodeBinding? = null
 
@@ -60,7 +55,12 @@ class PodcastDetailAndEpisodeFragment : Fragment() {
         arguments?.let {
             feedLink = it.getString("feedLink").toString()
         }
-        viewModel.fetchXmlFromfeedUrl(feedLink)
+        if (feedLink == ""){
+            Log.d(TAG, "onCreate: YESSSSSSSSS!!!!!!!!!")
+        }else{
+            viewModel.fetchXmlFromfeedUrl(feedLink)
+        }
+
     }
 
 
@@ -101,8 +101,8 @@ class PodcastDetailAndEpisodeFragment : Fragment() {
                     binding.tvDescription.text = it.data.description
                     binding.tvLanguage.text = it.data.language
                     binding.tvTitle.text = it.data.title
-                    Glide.with(this).load(it.data.imageUrl).into(binding.imageView)
-
+                    Glide.with(binding.imageView).load(it.data.imageUrl).into(binding.imageView)
+                    setSubscribeListener(it.data)
                     binding.rvEpisode.adapter =
                         EpisodeItemAdapter(it.data.episodes, object : EpisodeListener {
                             override fun onEpisodeClicked(episodeViewData: RssFeedResponse.EpisodeResponse) {
@@ -128,7 +128,6 @@ class PodcastDetailAndEpisodeFragment : Fragment() {
                             }
                         })
                     binding.rvEpisode.layoutManager = LinearLayoutManager(requireContext())
-
                 }
                 is Resource.None -> {
 
@@ -137,26 +136,46 @@ class PodcastDetailAndEpisodeFragment : Fragment() {
         }.launchIn(lifecycleScope)
     }
 
-    fun startPlaying(episodeViewData: RssFeedResponse.EpisodeResponse,fragmentActivity: FragmentActivity) {
+    private fun setSubscribeListener(data: RssFeedResponse) {
+        binding.podcastSubscribeButton.setOnClickListener {
+            mainViewModel.addRssPodcast(
+                DBRssFeedPodcast(
+                    title = data.title.toString(),
+                    description = data.description.toString(),
+                    language = data.language.toString(),
+                    link = data.link.toString(),
+                    imageUrl = data.imageUrl.toString()
+                )
+            ) {
+                mainViewModel.addPodcastsEpisodes(it, data.episodes)
+            }
+        }
+    }
+
+
+    fun startPlaying(
+        episodeViewData: RssFeedResponse.EpisodeResponse,
+        fragmentActivity: FragmentActivity
+    ) {
 //        val fragmentActivity = activity as FragmentActivity
 
         val sharedPref = fragmentActivity.getSharedPreferences(
             "SharePreferencePdCast", Context.MODE_PRIVATE
         )
         with(sharedPref.edit()) {
-            putBoolean("IsPlayedBefore",true)
-            putString("NowPlayingMediaLink",episodeViewData.episodeUrl)
+            putBoolean("IsPlayedBefore", true)
+            putString("NowPlayingMediaLink", episodeViewData.episodeUrl)
             putString("NowPlayingMediaImage", episodeViewData.imageUrl)
-            putString("NowPlayingEpisodeDuration",episodeViewData.duration)
+            putString("NowPlayingEpisodeDuration", episodeViewData.duration)
             putLong("NowPlayingPosition", 0L)
-            putString("NowPlyingPodcastName",episodeViewData.podcastName)
-            putString("NowPlyingPodcastEpisodeName",episodeViewData.title)
+            putString("NowPlyingPodcastName", episodeViewData.podcastName)
+            putString("NowPlyingPodcastEpisodeName", episodeViewData.title)
             apply()
         }
 
-        fun removeColon(duration: String):Long{
-            return if(duration.contains(":")){
-                duration.replace(":","").toLong()
+        fun removeColon(duration: String): Long {
+            return if (duration.contains(":")) {
+                duration.replace(":", "").toLong()
             } else duration.toLong()
         }
 
@@ -191,10 +210,6 @@ class PodcastDetailAndEpisodeFragment : Fragment() {
         )
         Log.d(TAG, "startPlaying: This is called ${episodeViewData.episodeUrl} HERE WE GOOOO!!")
     }
-
-
-
-
 
 
     companion object {
