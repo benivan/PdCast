@@ -7,11 +7,13 @@ import androidx.navigation.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.pdcast.data.model.ItunesPodcast
+import com.example.pdcast.data.model.PodcastModel
 import com.example.pdcast.data.response.RssFeedResponse
 import com.example.pdcast.databinding.HomeFragmentPodcastImageItemBinding
 
 class HomePodcastAdapter(
-    private val podcasts: List<ItunesPodcast>
+    private val podcasts: List<PodcastModel>,
+    private var listener : (PodcastModel) ->Unit
 ): RecyclerView.Adapter<HomePodcastAdapter.PodcastItemViewHolder>() {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PodcastItemViewHolder {
         val binding =
@@ -33,17 +35,22 @@ class HomePodcastAdapter(
         return podcasts.size
     }
 
-    class PodcastItemViewHolder(private val binding: HomeFragmentPodcastImageItemBinding) :
+   inner class PodcastItemViewHolder(private val binding: HomeFragmentPodcastImageItemBinding) :
         RecyclerView.ViewHolder(binding.root) {
-        fun bind(currentItem: ItunesPodcast) {
-            Glide.with(itemView).load(currentItem.artworkUrl100).into(binding.imageView)
+        fun bind(currentItem: PodcastModel) {
+            Glide.with(itemView).load(currentItem.imageUrl).into(binding.imageView)
 
-            binding.imageView.setOnClickListener {
-                val action = HomeScreenFragmentDirections.actionHomeFragmentToPodcastDetailAndEpisodeFragment(currentItem.feedUrl)
-                it.findNavController().navigate(action)
+//            binding.imageView.setOnClickListener {
+//                val action = HomeScreenFragmentDirections.actionHomeFragmentToPodcastDetailAndEpisodeFragment(currentItem.feedUrl)
+//                it.findNavController().navigate(action)
+//            }
+
+            binding.imageView.setOnClickListener{
+                listener(currentItem)
             }
 
         }
+
 
     }
 
