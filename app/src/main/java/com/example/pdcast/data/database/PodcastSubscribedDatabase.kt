@@ -5,13 +5,15 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.example.pdcast.data.dao.PodcastSubscribeDao
-import com.example.pdcast.data.model.ItunesPodcast
-import com.example.pdcast.data.model.PodcastDataBaseModel
-import java.time.Instant
+import com.example.pdcast.data.dao.RssFeedPodcastDao
+import com.example.pdcast.data.dto.DBPodcast
+import com.example.pdcast.data.dto.DBPodcastsEpisodes
+import com.example.pdcast.data.dto.DBRssFeedPodcast
 
-@Database(entities = [PodcastDataBaseModel::class], version = 1, exportSchema = false)
+@Database(entities = [DBPodcast::class,DBRssFeedPodcast::class,DBPodcastsEpisodes::class], version = 2, exportSchema = false)
 abstract class PodcastSubscribedDatabase : RoomDatabase() {
     abstract fun podcastSubscribeDao(): PodcastSubscribeDao
+    abstract fun rssFeedPodcastDao():RssFeedPodcastDao
 
     companion object {
         @Volatile
