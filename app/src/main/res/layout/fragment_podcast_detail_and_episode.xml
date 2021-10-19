@@ -5,6 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/white"
     tools:context=".ui.view.PodcastDetailAndEpisodeFragment">
 
     <androidx.core.widget.NestedScrollView
@@ -83,6 +84,7 @@
                 app:layout_constraintTop_toBottomOf="@+id/tvDescription"
                 app:layout_constraintVertical_bias="0.0"
                 tools:itemCount="2"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                 tools:listitem="@layout/episode_items" />
 
             <ProgressBar
