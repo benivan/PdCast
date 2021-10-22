@@ -19,7 +19,6 @@ import kotlinx.coroutines.launch
 class SearchItemAdapter(
     private val podcasts: List<ItunesPodcast>,
     private var listener: (Int) -> Unit,
-    private var subscribeButtonListener:(ItunesPodcast) ->Unit
 ) : RecyclerView.Adapter<SearchItemAdapter.SearchItemViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SearchItemViewHolder {
@@ -50,24 +49,11 @@ class SearchItemAdapter(
 
             itemBinding.tvHeading.text = currentItem.collectionCensoredName
 
-            itemBinding.tvHeading.setOnClickListener {
-                Log.d(TAG, "${currentItem.feedUrl}")
-                    val action = SearchFragmentDirections.actionSearchFragmentToPodcastDetailAndEpisodeFragment(currentItem.feedUrl)
-                    it.findNavController().navigate(action)
-            }
 
-            itemBinding.ivPicture.setOnClickListener {
+            itemBinding.podcastItem.setOnClickListener {
                 Log.d(TAG, "${currentItem.feedUrl}")
                 val action = SearchFragmentDirections.actionSearchFragmentToPodcastDetailAndEpisodeFragment(currentItem.feedUrl)
                 it.findNavController().navigate(action)
-            }
-
-            itemBinding.subscribeButton.setOnClickListener {
-                subscribeButtonListener(currentItem)
-            }
-
-            CoroutineScope(Dispatchers.IO).launch {
-
             }
         }
 
