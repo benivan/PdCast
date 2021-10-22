@@ -24,7 +24,7 @@ import kotlinx.coroutines.launch
 class SearchFragment : Fragment() {
 
     private val viewModel: PodcastsSearchViewModel by viewModels()
-    private val mainPodcastViewModel: MainViewModel by viewModels()
+
 
     private var _binding: FragmentSearchBinding? = null
     private val binding: FragmentSearchBinding get() = _binding!!
@@ -47,6 +47,7 @@ class SearchFragment : Fragment() {
         binding.textView.visibility = View.GONE
         binding.progressBar.visibility = View.GONE
         binding.floatingActionButton.visibility = View.GONE
+
         binding.btnSearch.setOnClickListener {
             viewModel.getPodcastWithTerms(binding.searchTextInput.text.toString())
         }
@@ -86,11 +87,6 @@ class SearchFragment : Fragment() {
                                     } else {
                                         binding.floatingActionButton.visibility = View.GONE
                                     }
-                                },
-                                subscribeButtonListener = {itunesPodcast ->
-                                    lifecycleScope.launch(Dispatchers.IO) {
-                                        mainPodcastViewModel.addPodcast(dataMapper.mapModelToEntity(itunesPodcast))
-                                    }
                                 })
                         val layoutManager = LinearLayoutManager(requireContext())
 
@@ -106,8 +102,6 @@ class SearchFragment : Fragment() {
                         binding.floatingActionButton.setOnClickListener {
                             binding.recyclerView.scrollToPosition(0)
                         }
-                    }
-                    is Resource.None -> {
                     }
                 }
             }.launchIn(lifecycleScope)
