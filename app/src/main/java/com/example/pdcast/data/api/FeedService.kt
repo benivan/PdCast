@@ -8,10 +8,7 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
 
-interface ApiResponse<T> {
-    fun onSuccess(data: T)
-    fun onFailure(throwable: Throwable)
-}
+
 
 object RssFeedService {
 
@@ -67,6 +64,10 @@ object RssFeedService {
     }
 
 
+}
+interface ApiResponse<T> {
+    fun onSuccess(data: T)
+    fun onFailure(throwable: Throwable)
 }
 
 
