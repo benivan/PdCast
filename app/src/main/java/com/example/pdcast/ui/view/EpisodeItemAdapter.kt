@@ -12,7 +12,7 @@ import com.example.pdcast.data.response.RssFeedResponse
 import com.example.pdcast.databinding.EpisodeItemsBinding
 
 class EpisodeItemAdapter(
-    private val episodes: List<RssFeedResponse.EpisodeResponse>,
+    private var episodes: List<RssFeedResponse.EpisodeResponse>,
     private val episodeListener: EpisodeListener
 ) : RecyclerView.Adapter<EpisodeItemAdapter.EpisodeItemViewHolder>() {
 
@@ -26,6 +26,11 @@ class EpisodeItemAdapter(
     override fun onBindViewHolder(holder: EpisodeItemViewHolder, position: Int) {
         val currentItem = episodes[position]
         holder.bind(currentItem)
+    }
+
+    fun submitList(list: List<RssFeedResponse.EpisodeResponse>) {
+        episodes = list
+        notifyDataSetChanged()
     }
 
     override fun getItemCount(): Int {
@@ -51,10 +56,6 @@ class EpisodeItemAdapter(
                 Log.d(TAG, "bind-Link: ${currentItem.episodeUrl}")
                 episodeListener.onEpisodeClicked(currentItem)
             }
-
-            binding.root.setOnClickListener {
-                episodeListener.onSelectedEpisode(currentItem)
-            }
         }
 
     }
@@ -66,5 +67,4 @@ class EpisodeItemAdapter(
 
 interface EpisodeListener {
     fun onEpisodeClicked(episodeViewData: RssFeedResponse.EpisodeResponse)
-    fun onSelectedEpisode(episodeViewData: RssFeedResponse.EpisodeResponse)
 }
