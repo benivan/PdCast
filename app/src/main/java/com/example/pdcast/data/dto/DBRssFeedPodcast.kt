@@ -7,6 +7,7 @@ import androidx.room.*
 data class DBRssFeedPodcast(
     @PrimaryKey(autoGenerate = true)
     val podcastId: Long? = null,
+    val podcastFeedUrl:String,
     val title: String,
     val description: String,
     val language:String,
