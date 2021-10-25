@@ -9,7 +9,9 @@ import android.view.ViewGroup
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import com.example.pdcast.data.model.PodcastModel
 import com.example.pdcast.data.response.RssFeedResponse
@@ -17,6 +19,8 @@ import com.example.pdcast.databinding.FragmentHomeScreenBinding
 import com.example.pdcast.ui.MainViewModel
 import com.example.pdcast.util.DataMapper
 import com.google.android.material.transition.MaterialFadeThrough
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 
 
 class HomeScreenFragment : Fragment() {
@@ -46,26 +50,14 @@ class HomeScreenFragment : Fragment() {
 
         val dataMapper = DataMapper()
 
-//       viewModel.readAllDataDB.observe(viewLifecycleOwner, Observer { listOfPodcastDatabaseModel ->
-//           binding.errorMessage.visibility =View.GONE
-//           binding.homeScreenProgressBar.visibility =View.GONE
-//           val listOfPodcasts = listOfPodcastDatabaseModel.map{
-//               dataMapper.mapEntityToModel(it)
-//           }.toList()
-//
-//           binding.homeFragmentRecyclerView.adapter = HomePodcastAdapter(listOfPodcasts)
-//
-//           val layoutManager = GridLayoutManager(requireContext(),2)
-//
-//           binding.homeFragmentRecyclerView.layoutManager = layoutManager
-//       })
 
-        mainViewModel.readAllPodcast.observe(viewLifecycleOwner, Observer { listOfPodcast->
+        mainViewModel.readAllPodcast.onEach {  listOfPodcast->
             binding.errorMessage.visibility = View.GONE
             binding.homeScreenProgressBar.visibility =View.GONE
 
             val podcastList = listOfPodcast.map { PodcastModel(
                 podcastId = it.podcastId,
+                podcastFeedUrl = it.podcastFeedUrl,
                 title = it.title,
                 description = it.description,
                 language = it.language,
@@ -74,42 +66,12 @@ class HomeScreenFragment : Fragment() {
                 )
             }.toList()
 
-            binding.homeFragmentRecyclerView.adapter = HomePodcastAdapter(podcastList){
-                it.podcastId?.let { mainViewModel.getPodcastWithId(it)}
-                mainViewModel.podcastsWithEpisodes?.observe(viewLifecycleOwner, Observer { listPodcastWithEpisode->
-                    val podcastsWithEpisodes =  listPodcastWithEpisode.elementAt(0)
-
-                    val podcastDetailWithEpisode = RssFeedResponse(
-                        title = podcastsWithEpisodes.podcast.title,
-                        description = podcastsWithEpisodes.podcast.description,
-                        language = podcastsWithEpisodes.podcast.language,
-                        link = podcastsWithEpisodes.podcast.link,
-                        imageUrl = podcastsWithEpisodes.podcast.imageUrl,
-                        episodes = podcastsWithEpisodes.episodes.map { dbPodcastEpisode ->
-                            RssFeedResponse.EpisodeResponse(
-                                title = dbPodcastEpisode.title,
-                                link = dbPodcastEpisode.link,
-                                description = dbPodcastEpisode.description,
-                                pubDate = dbPodcastEpisode.pubDate,
-                                duration = dbPodcastEpisode.duration,
-                                episodeUrl = dbPodcastEpisode.episodeUrl,
-                                imageUrl = dbPodcastEpisode.imageUrl,
-                                podcastName = dbPodcastEpisode.podcastName
-                            )
-                        }.toMutableList()
-                    )
-                    val action = HomeScreenFragmentDirections.actionHomeFragmentToPodcastDetailAndEpisodeFragment("")
-                        binding.root.findNavController().navigate(action)
-
-                    Log.d(TAG, "onViewCreated: $podcastDetailWithEpisode")
-
-                })
-            }
+            binding.homeFragmentRecyclerView.adapter = HomePodcastAdapter(podcastList)
 
             val layoutManager = GridLayoutManager(requireContext(),2)
 
             binding.homeFragmentRecyclerView.layoutManager = layoutManager
-        })
+        }.launchIn(lifecycleScope)
     }
 
 
