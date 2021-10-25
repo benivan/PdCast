@@ -6,6 +6,7 @@ import android.support.v4.media.session.MediaControllerCompat
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.asFlow
 import androidx.lifecycle.viewModelScope
 import com.example.pdcast.data.database.PodcastSubscribedDatabase
 import com.example.pdcast.data.dto.DBPodcast
@@ -15,45 +16,29 @@ import com.example.pdcast.data.dto.relations.PodcastsWithEpisodes
 import com.example.pdcast.data.repository.PodcastRepository
 import com.example.pdcast.data.repository.RssFeedPodcastRepository
 import com.example.pdcast.data.response.RssFeedResponse
+import com.example.pdcast.util.Resource
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resumeWithException
-
-class MainViewModel(application: Application) : AndroidViewModel(application) {
-
-    val readAllDataDB: LiveData<List<DBPodcast>>
-    val readAllPodcast: LiveData<List<DBRssFeedPodcast>>
-     var podcastsWithEpisodes:LiveData<List<PodcastsWithEpisodes>>? = null
-
-    private val podcastRepository: PodcastRepository
-    private val rssFeedPodcastRepository: RssFeedPodcastRepository
-
-    init {
-        val podcastSubscribeDao =
-            PodcastSubscribedDatabase.getDatabase(application).podcastSubscribeDao()
-        podcastRepository = PodcastRepository(podcastSubscribeDao)
-        readAllDataDB = podcastRepository.readAllDataDB
+import kotlin.system.measureTimeMillis
 
 
-        val rssFeedPodcastDao =
-            PodcastSubscribedDatabase.getDatabase(application).rssFeedPodcastDao()
-        rssFeedPodcastRepository = RssFeedPodcastRepository(rssFeedPodcastDao)
+class MainViewModel(
+    private val rssFeedPodcastRepository: RssFeedPodcastRepository,
+    application: Application
+) :
+    AndroidViewModel(application) {
 
-        readAllPodcast = rssFeedPodcastRepository.readAllPodcast
+    val readAllPodcast: Flow<List<DBRssFeedPodcast>> = rssFeedPodcastRepository.readAllPodcast
 
-    }
+    var podcastsWithEpisodes: LiveData<List<PodcastsWithEpisodes>>? = null
 
-    fun getPodcastDataWithTitle(title: String){
-        podcastsWithEpisodes = rssFeedPodcastRepository.readPodcastsWithEpisodes(title)
-    }
-    fun getPodcastWithId(id:Long){
-        podcastsWithEpisodes  = rssFeedPodcastRepository.readPodcastsWithEpisodes(id)
-    }
+    private val _podcast = MutableSharedFlow<Resource<RssFeedResponse>>(0)
 
-
+    val podcast: SharedFlow<Resource<RssFeedResponse>> = _podcast.asSharedFlow()
 
     private var _controller: MediaControllerCompat? = null
 
@@ -78,12 +63,11 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         _playFromUri.emit(isPlayFromUri)
     }
 
-
-    fun addPodcast(DBPodcast: DBPodcast) {
-        viewModelScope.launch(Dispatchers.IO) {
-            podcastRepository.addPodcast(DBPodcast)
-        }
+    fun getRssFeedPodcastRepository():RssFeedPodcastRepository{
+        return rssFeedPodcastRepository
     }
+
+
 
     fun addRssPodcast(podcast: DBRssFeedPodcast, callback: (Long) -> Unit) {
         viewModelScope.launch(Dispatchers.IO) {
