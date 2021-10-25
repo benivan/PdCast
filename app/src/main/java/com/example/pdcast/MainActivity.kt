@@ -1,11 +1,6 @@
 package com.example.pdcast
 
-import android.app.Activity
 import android.content.*
-import android.graphics.drawable.Drawable
-import android.media.MediaPlayer
-import android.net.Uri
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaMetadataCompat
@@ -14,33 +9,31 @@ import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
 import android.view.MenuItem
-import android.view.View
-import android.widget.MediaController
-import android.widget.SeekBar
 import androidx.activity.viewModels
+import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.net.toUri
-import androidx.lifecycle.flowWithLifecycle
+import androidx.core.view.isVisible
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
+import androidx.navigation.NavController.OnDestinationChangedListener
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.onNavDestinationSelected
 import androidx.navigation.ui.setupWithNavController
 import com.bumptech.glide.Glide
+import com.example.pdcast.data.api.RssFeedService
+import com.example.pdcast.data.database.PodcastSubscribedDatabase
+import com.example.pdcast.data.repository.PodcastRepository
+import com.example.pdcast.data.repository.RssFeedPodcastRepository
 import com.example.pdcast.databinding.ActivityMainBinding
-import com.example.pdcast.databinding.LayoutBottomSheetBinding
 import com.example.pdcast.mediaPlayer.MediaPlaybackService
-import com.example.pdcast.mediaPlayer.PdCastMediaCallback
-import com.example.pdcast.ui.PlayerVIewModel
+import com.example.pdcast.ui.MainViewModel
+import com.example.pdcast.ui.MainViewModelFactory
 import com.example.pdcast.util.PState
-import com.example.pdcast.util.PState.*
-import com.example.pdcast.util.PlayerState
-import com.google.android.exoplayer2.util.Util
-import com.google.android.material.bottomsheet.BottomSheetDialog
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlin.math.log
 
 
 class MainActivity : AppCompatActivity() {
@@ -55,22 +48,38 @@ class MainActivity : AppCompatActivity() {
 
     private var mediaControllerCallback: MainActivity.MediaControllerCallback? = null
 
+    private lateinit var podcastRepository: PodcastRepository
 
-    private val playerViewModel: PlayerVIewModel by viewModels()
+    private lateinit var rssFeedPodcastRepository: RssFeedPodcastRepository
+
+    lateinit var mainViewModel:MainViewModel
+
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
 
+        val podcastSubscribeDao =
+            PodcastSubscribedDatabase.getDatabase(this).podcastSubscribeDao()
+        podcastRepository = PodcastRepository(podcastSubscribeDao)
+
+        val rssFeedService = RssFeedService
+
+        val rssFeedPodcastDao =
+            PodcastSubscribedDatabase.getDatabase(this).rssFeedPodcastDao()
+        rssFeedPodcastRepository = RssFeedPodcastRepository(rssFeedPodcastDao,rssFeedService)
+
+
+        val viewModelFactory =  MainViewModelFactory(rssFeedPodcastRepository,application)
+        mainViewModel = ViewModelProvider(this,viewModelFactory)[MainViewModel::class.java]
 
         val navHostFragment = supportFragmentManager
             .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
 
-        val navController = navHostFragment.navController
+        navController = navHostFragment.navController
 
-        setupBottomNAvMenu(navController)
-
+        binding.bottomNavigation.setupWithNavController(navController)
 
         val appBarConfiguration = AppBarConfiguration(
             topLevelDestinationIds = setOf(),
@@ -80,6 +89,19 @@ class MainActivity : AppCompatActivity() {
             navController,
             appBarConfiguration
         )
+
+        mainViewModel.playFromUri
+            .onEach {
+                if (it) {
+                    playFromSharedPreference()
+                    mainViewModel.startPlayFromUri(false)
+                }
+            }.launchIn(lifecycleScope)
+
+            setListeners()
+    }
+
+    private fun setListeners() {
         binding.playPauseButton.setOnClickListener {
             if (controller.playbackState != null) {
                 if (controller.playbackState.state == PlaybackStateCompat.STATE_PLAYING) {
@@ -122,11 +144,16 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.bottomPlayerLayout.setOnClickListener {
-//            navController.navigateUp()
-            navController.navigate(R.id.playerFragment)
-
+            if (previouslyPlayedData()) {
+                navController.navigateUp()
+                navController.navigate(R.id.playerFragment)
+            }
         }
+    }
 
+    private val navDestinationChangedListener = OnDestinationChangedListener { _, destination, _ ->
+        binding.bottomNavigation.isVisible = destination.id != R.id.playerFragment
+        binding.bottomPlayerLayout.isVisible = destination.id != R.id.playerFragment
     }
 
     private fun playFromSharedPreference() {
@@ -166,11 +193,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return item.onNavDestinationSelected(navController) || super.onOptionsItemSelected(item)
-    }
-
-    private fun setupBottomNAvMenu(navController: NavController) {
-        val bottomNav = binding.bottomNavigation
-        bottomNav.setupWithNavController(navController)
     }
 
     private fun seekBy(controller: MediaControllerCompat, second: Int) {
@@ -222,6 +244,8 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
+        Log.d(TAG, "onStart: ")
+        navController.addOnDestinationChangedListener(navDestinationChangedListener)
         val intentFilter = IntentFilter(MediaPlaybackService.PREPARED)
         registerReceiver(preparedListener, intentFilter)
     }
@@ -233,16 +257,17 @@ class MainActivity : AppCompatActivity() {
             registerMediaController(mediaBrowser.sessionToken)
             controller = MediaControllerCompat.getMediaController(this@MainActivity)
 
-            if (controller.playbackState != null){
+            if (controller.playbackState != null) {
                 if (controller.playbackState.state == PlaybackStateCompat.STATE_PAUSED) {
                     binding.playPauseButton.setImageResource(R.drawable.play_arrow)
                 }
                 if (controller.playbackState.state == PlaybackStateCompat.STATE_PLAYING) {
                     binding.playPauseButton.setImageResource(R.drawable.pause)
+                    mainViewModel.setPlaying(true)
                 }
             }
 
-            if(previouslyPlayedData()) {
+            if (previouslyPlayedData()) {
                 val sharedPref = this@MainActivity.getSharedPreferences(
                     getString(R.string.preference_file_key), Context.MODE_PRIVATE
                 )
@@ -267,8 +292,8 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        Log.d(TAG, "onResume: ")
         initMediaBrowser()
-        binding.bottomPlayerLayout.visibility = View.VISIBLE
         if (mediaBrowser.isConnected) {
             Log.d(TAG, "onStart: media browser connected")
             if (MediaControllerCompat.getMediaController(this) == null) {
@@ -283,6 +308,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onPause() {
         super.onPause()
+        Log.d(TAG, "onPause: ")
         if (MediaControllerCompat.getMediaController(this) != null) {
             mediaControllerCallback?.let {
                 MediaControllerCompat.getMediaController(this)
@@ -294,6 +320,7 @@ class MainActivity : AppCompatActivity() {
     override fun onStop() {
         super.onStop()
         Log.d(TAG, "onStop: ")
+        navController.removeOnDestinationChangedListener(navDestinationChangedListener)
         unregisterReceiver(preparedListener)
         if (MediaControllerCompat.getMediaController(this) != null) {
             mediaControllerCallback?.let {
@@ -302,7 +329,6 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
-
 
 
     private val preparedListener = object : BroadcastReceiver() {
@@ -320,7 +346,7 @@ class MainActivity : AppCompatActivity() {
                         Glide.with(this@MainActivity).load(nowPlayingMediaImage)
                             .into(binding.bottomPlayImage)
                         controller.transportControls.seekTo(previousPosition)
-
+                        mainViewModel.setController(controller)
                     }
 
                 } else if (it.getBooleanExtra("SEEK_COMPLETED", false)) {
@@ -328,6 +354,8 @@ class MainActivity : AppCompatActivity() {
                 } else if (it.hasExtra("MEDIA_STATE")) {
                     val state = it.getIntExtra("MEDIA_STATE", 1000010)
                     Log.d(TAG, "onReceive: state is ${PState.of(state)}")
+                    if (state == 2) mainViewModel.setPlaying(false)
+                    if (state == 3) mainViewModel.setPlaying(true)
                 }
                 Unit
             }
