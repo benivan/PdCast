@@ -59,6 +59,7 @@ class MediaPlaybackService : MediaBrowserServiceCompat(), PdCastMediaCallback.Po
         sessionToken = mediaSession.sessionToken
         val callBack = PdCastMediaCallback(this, mediaSession)
         callBack.listener = this
+
         mediaSession.setCallback(callBack)
 
         val maxMemory = (Runtime.getRuntime().maxMemory() / 1024).toInt()

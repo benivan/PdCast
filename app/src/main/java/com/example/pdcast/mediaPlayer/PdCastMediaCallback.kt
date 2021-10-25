@@ -19,8 +19,8 @@ private const val TAG = "PdCastMediaCallback"
 
 class PdCastMediaCallback(
     val context: Context,
-    val mediaSession: MediaSessionCompat,
-    var mediaPlayer: MediaPlayer? = null
+    private val mediaSession: MediaSessionCompat,
+    private var mediaPlayer: MediaPlayer? = null
 ) : MediaSessionCompat.Callback() {
 
 
