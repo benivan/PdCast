@@ -12,8 +12,7 @@ import com.example.pdcast.data.response.RssFeedResponse
 import com.example.pdcast.databinding.HomeFragmentPodcastImageItemBinding
 
 class HomePodcastAdapter(
-    private val podcasts: List<PodcastModel>,
-    private var listener : (PodcastModel) ->Unit
+    private val podcasts: List<PodcastModel>
 ): RecyclerView.Adapter<HomePodcastAdapter.PodcastItemViewHolder>() {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PodcastItemViewHolder {
         val binding =
@@ -39,16 +38,10 @@ class HomePodcastAdapter(
         RecyclerView.ViewHolder(binding.root) {
         fun bind(currentItem: PodcastModel) {
             Glide.with(itemView).load(currentItem.imageUrl).into(binding.imageView)
-
-//            binding.imageView.setOnClickListener {
-//                val action = HomeScreenFragmentDirections.actionHomeFragmentToPodcastDetailAndEpisodeFragment(currentItem.feedUrl)
-//                it.findNavController().navigate(action)
-//            }
-
-            binding.imageView.setOnClickListener{
-                listener(currentItem)
+            binding.imageView.setOnClickListener {
+                val action = HomeScreenFragmentDirections.actionHomeFragmentToPodcastDetailAndEpisodeFragment(currentItem.podcastFeedUrl)
+                it.findNavController().navigate(action)
             }
-
         }
 
 
