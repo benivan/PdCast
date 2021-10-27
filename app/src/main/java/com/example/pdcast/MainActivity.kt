@@ -9,6 +9,7 @@ import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
 import android.view.MenuItem
+import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
@@ -99,6 +100,8 @@ class MainActivity : AppCompatActivity() {
             }.launchIn(lifecycleScope)
 
             setListeners()
+        binding.bottomPlayerLayout.isVisible = previouslyPlayedData()
+
     }
 
     private fun setListeners() {
@@ -267,7 +270,10 @@ class MainActivity : AppCompatActivity() {
                 }
             }
 
+
+
             if (previouslyPlayedData()) {
+
                 val sharedPref = this@MainActivity.getSharedPreferences(
                     getString(R.string.preference_file_key), Context.MODE_PRIVATE
                 )
