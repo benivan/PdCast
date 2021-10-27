@@ -40,10 +40,10 @@ class MainViewModel(
 
     val podcast: SharedFlow<Resource<RssFeedResponse>> = _podcast.asSharedFlow()
 
-    private var _controller: MediaControllerCompat? = null
+    private var controller : MediaControllerCompat? = null
+
 
     private val _isPlaying: MutableSharedFlow<Boolean> = MutableSharedFlow(1)
-
     val isPlaying = _isPlaying.asSharedFlow()
 
     private val _playFromUri: MutableSharedFlow<Boolean> = MutableSharedFlow(1)
@@ -51,9 +51,12 @@ class MainViewModel(
     val playFromUri = _playFromUri.asSharedFlow()
 
     fun setController(controllerCompat: MediaControllerCompat) {
-        Log.d(TAG, "setController: ${controllerCompat.playbackState}")
-        _controller = controllerCompat
+        controller = controllerCompat
     }
+    fun getController(): MediaControllerCompat? {
+        return controller
+    }
+
 
     fun setPlaying(isPlayingX: Boolean) = viewModelScope.launch {
         _isPlaying.emit(isPlayingX)
@@ -96,9 +99,7 @@ class MainViewModel(
     }
 
 
-    fun getControllerFromViewModel(): MediaControllerCompat? {
-        return _controller
-    }
+
 
 
     companion object {
