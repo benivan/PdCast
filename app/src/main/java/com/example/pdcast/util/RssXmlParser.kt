@@ -1,6 +1,5 @@
 package com.example.pdcast.util
 
-import android.util.Log
 import android.util.Xml
 import com.example.pdcast.data.response.RssFeedResponse
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -247,13 +246,24 @@ class RssXmlParser {
         parser.require(XmlPullParser.START_TAG, ns, "itunes:duration")
         val durationTime = readText(parser)
         parser.require(XmlPullParser.END_TAG, ns, "itunes:duration")
-        fun removeColon(duration: String):String{
-            return if(duration.contains(":")){
-                duration.replace(":","")
-            } else duration
-        }
-        return removeColon(durationTime)
+
+        return if (durationTime.contains(":")) {
+            var duration:String = ""
+            val split = durationTime.split(":")
+            if(split.size == 3){
+                duration = (split[0].toInt()*3600+split[1].toInt()*60+split[0].toInt()).toString()
+            }
+            if(split.size == 2){
+                duration = (split[0].toInt()*60+split[1].toInt()).toString()
+            }
+            if(split.size == 1){
+                duration = (split[1].toInt()).toString()
+            }
+            duration
+        } else durationTime
+
     }
+
 
     @Throws(XmlPullParserException::class, IOException::class)
     private fun readEpisodeUrl(parser: XmlPullParser): String? {
