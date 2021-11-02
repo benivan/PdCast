@@ -362,6 +362,10 @@ class MainActivity : AppCompatActivity() {
                     Log.d(TAG, "onReceive: state is ${PState.of(state)}")
                     if (state == 2) mainViewModel.setPlaying(false)
                     if (state == 3) mainViewModel.setPlaying(true)
+                }else if(it.hasExtra("BUFFERING_LEVEL")){
+                    mainViewModel.bufferingLevel(
+                        it.getIntExtra("BUFFERING_LEVEL",0)
+                    )
                 }
                 Unit
             }
