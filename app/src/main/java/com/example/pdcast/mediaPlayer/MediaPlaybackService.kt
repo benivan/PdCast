@@ -8,6 +8,7 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.media.MediaPlayer
 import android.os.Build
 import android.os.Bundle
 import android.support.v4.media.MediaBrowserCompat
@@ -39,6 +40,8 @@ class MediaPlaybackService : MediaBrowserServiceCompat(), PdCastMediaCallback.Po
     private lateinit var memoryCache: LruCache<String, Bitmap>
 
     private lateinit var mediaSession: MediaSessionCompat
+
+    private var mediaPlayer:MediaPlayer ?= null
     private lateinit var mediaSessionConnector: MediaSessionConnector
 
     private val PLAYER_CHANNEL_ID = "podplay_player_channel"
@@ -70,6 +73,8 @@ class MediaPlaybackService : MediaBrowserServiceCompat(), PdCastMediaCallback.Po
                 return value!!.byteCount / 1024
             }
         }
+
+
 
     }
 
@@ -288,19 +293,19 @@ class MediaPlaybackService : MediaBrowserServiceCompat(), PdCastMediaCallback.Po
 
     }
 
+
     override fun onPausePlaying() {
         stopForeground(false)
     }
 
     override fun onSeekCompleted() {
-        Log.d(TAG, "onSeekCompleted: ")
         val intent = Intent().apply {
             action = PREPARED
             putExtra("SEEK_COMPLETED", true)
         }
         sendBroadcast(intent)
-
     }
+
 
     override fun onMediaPlayerPrepared() {
         val intent = Intent().apply {
@@ -310,9 +315,15 @@ class MediaPlaybackService : MediaBrowserServiceCompat(), PdCastMediaCallback.Po
         sendBroadcast(intent)
     }
 
+    override fun onMediaPlayerPreparedWithMediaPlayer(mediaPlayer: MediaPlayer) {
+        this.mediaPlayer = mediaPlayer
+    }
+
+
     private fun getBitMapFromMemoryCache(key: String): Bitmap? {
         return memoryCache.get(key)
     }
+
 
     private fun setBitMapToMemoryCache(key: String, bitmap: Bitmap) {
         if (getBitMapFromMemoryCache(key) == null) {
