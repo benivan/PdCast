@@ -46,6 +46,9 @@ class MainViewModel(
     private val _isPlaying: MutableSharedFlow<Boolean> = MutableSharedFlow(1)
     val isPlaying = _isPlaying.asSharedFlow()
 
+    private val _bufferLevel:MutableSharedFlow<Int> = MutableSharedFlow(0)
+    val bufferLevel  = _bufferLevel.asSharedFlow()
+
     private val _playFromUri: MutableSharedFlow<Boolean> = MutableSharedFlow(1)
 
     val playFromUri = _playFromUri.asSharedFlow()
@@ -98,8 +101,11 @@ class MainViewModel(
         }
     }
 
-
-
+    fun bufferingLevel(intExtra: Int) {
+        viewModelScope.launch {
+            _bufferLevel.emit(intExtra)
+        }
+    }
 
 
     companion object {
