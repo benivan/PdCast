@@ -9,7 +9,9 @@ import com.example.pdcast.data.repository.ItunesPodcastRepository
 import com.example.pdcast.data.repository.PodcastRepository
 import com.example.pdcast.util.Resource
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 
 class PodcastsSearchViewModel : ViewModel() {
@@ -19,9 +21,9 @@ class PodcastsSearchViewModel : ViewModel() {
 
 
 
-    private val _podcasts = MutableStateFlow<Resource<Podcast>>(Resource.None())
+    private val _podcasts = MutableSharedFlow<Resource<Podcast>>(1)
 
-    val podcasts: StateFlow<Resource<Podcast>> = _podcasts
+    val podcasts: SharedFlow<Resource<Podcast>> = _podcasts
 
     private var itemPosition:Int = 0
 
