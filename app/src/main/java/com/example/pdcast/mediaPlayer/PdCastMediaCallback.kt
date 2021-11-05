@@ -67,6 +67,8 @@ class PdCastMediaCallback(
         setState(PlaybackStateCompat.STATE_PLAYING)
     }
 
+
+
     override fun onPlay() {
         super.onPlay()
         if (ensureAudioFocus()) {
@@ -97,7 +99,6 @@ class PdCastMediaCallback(
             setState(PlaybackStateCompat.STATE_PAUSED)
         }
     }
-
 
     override fun onStop() {
         super.onStop()
@@ -189,7 +190,9 @@ class PdCastMediaCallback(
             }
             mediaPlayer!!.setOnPreparedListener{
                 listener?.onMediaPlayerPrepared()
+                listener?.onMediaPlayerPreparedWithMediaPlayer(mediaPlayer!!)
             }
+
 
         }
     }
@@ -283,6 +286,7 @@ class PdCastMediaCallback(
         fun onPausePlaying()
         fun onSeekCompleted()
         fun onMediaPlayerPrepared()
+        fun onMediaPlayerPreparedWithMediaPlayer(mediaPlayer: MediaPlayer)
     }
 
     private suspend fun prepareMediaController(mediaUri: Uri) = suspendCancellableCoroutine<Unit> {
