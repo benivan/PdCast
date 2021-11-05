@@ -4,7 +4,6 @@ import android.content.Context
 import android.media.MediaMetadata
 import android.net.Uri
 import android.os.Bundle
-import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.PlaybackStateCompat
@@ -20,8 +19,8 @@ import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
 import com.bumptech.glide.Glide
+import com.example.pdcast.data.dto.DBPodcastsEpisodes
 import com.example.pdcast.data.dto.DBRssFeedPodcast
-import com.example.pdcast.data.repository.RssFeedPodcastRepository
 import com.example.pdcast.data.response.RssFeedResponse
 import com.example.pdcast.databinding.FragmentPodcastDetailAndEpisodeBinding
 import com.example.pdcast.ui.MainViewModel
@@ -30,6 +29,7 @@ import com.example.pdcast.util.Resource
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import javax.annotation.meta.When
 
 
 class PodcastDetailAndEpisodeFragment : Fragment() {
@@ -90,7 +90,9 @@ class PodcastDetailAndEpisodeFragment : Fragment() {
                     startPlaying(episodeViewData, activity)
                 }
             }
-        })
+        },
+
+        )
         binding.rvEpisode.adapter = episodeAdapter
 
 
@@ -110,7 +112,7 @@ class PodcastDetailAndEpisodeFragment : Fragment() {
                     binding.podcastSubscribeButton.visibility = View.GONE
                 }
                 is Resource.Success -> {
-                    Log.d(TAG, "onViewCreated: success")
+                    Log.d(TAG, "onViewCreated: ${it}")
                     binding.progressBarEpisodePage.visibility = View.GONE
                     binding.errorTextView.visibility = View.GONE
                     binding.tvDescription.visibility = View.GONE
@@ -119,31 +121,39 @@ class PodcastDetailAndEpisodeFragment : Fragment() {
                     binding.tvLanguage.text = it.data.language
                     binding.tvTitle.text = it.data.title
                     Glide.with(binding.imageView).load(it.data.imageUrl).into(binding.imageView)
-                    setSubscribeListener(it.data)
-                    episodeAdapter.submitList(it.data.episodes)
+//                    setSubscribeListener(it.data)
+                    val sizeOfPodcastEpisode = it.data.episodes.size
+                    if (sizeOfPodcastEpisode <= 5){
+                        episodeAdapter.submitList(it.data.episodes.filterIndexed{
+                            index, episodeResponse ->  index<=sizeOfPodcastEpisode
+                        })
+                    }else{
+                        episodeAdapter.submitList(it.data.episodes.filterIndexed{
+                                index, episodeResponse ->  index<=5
+                        })
+                    }
+
+
                 }
             }
         }.catch { e ->
             e.printStackTrace()
         }.launchIn(lifecycleScope)
+
+
+
     }
 
-    private fun setSubscribeListener(data: RssFeedResponse) {
-        binding.podcastSubscribeButton.setOnClickListener {
-            mainViewModel.addRssPodcast(
-                DBRssFeedPodcast(
-                    title = data.title.toString(),
-                    podcastFeedUrl = args.feedLink,
-                    description = data.description.toString(),
-                    language = data.language.toString(),
-                    link = data.link.toString(),
-                    imageUrl = data.imageUrl.toString()
-                )
-            ) {
-                mainViewModel.addPodcastsEpisodes(it, data.episodes)
-            }
-        }
-    }
+
+
+
+//    private fun setSubscribeListener(data: RssFeedResponse) {
+//        binding.podcastSubscribeButton.setOnClickListener {
+//            mainViewModel.addRssPodcast(data) {
+//                mainViewModel.addPodcastsEpisodes(it, data.episodes)
+//            }
+//        }
+//    }
 
 
     fun startPlaying(
