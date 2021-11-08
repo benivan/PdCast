@@ -84,6 +84,7 @@
             android:layout_marginTop="16dp"
             android:background="@drawable/play_button_background"
             android:clickable="true"
+            android:hapticFeedbackEnabled="true"
             android:foreground="@drawable/episode_play_button_foreground"
             android:src="@drawable/play_arrow_black"
             android:text="play"
