@@ -9,8 +9,6 @@ import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
 import android.view.MenuItem
-import android.view.View
-import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.net.toUri
@@ -59,6 +57,10 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        try {
+            this.supportActionBar!!.hide()
+        } catch (e: NullPointerException) {
+        }
         setContentView(binding.root)
 
         val podcastSubscribeDao =
@@ -148,7 +150,7 @@ class MainActivity : AppCompatActivity() {
 
         binding.bottomPlayerLayout.setOnClickListener {
             if (previouslyPlayedData()) {
-                navController.navigateUp()
+//                navController.navigateUp()
                 navController.navigate(R.id.playerFragment)
             }
         }
@@ -261,6 +263,7 @@ class MainActivity : AppCompatActivity() {
             controller = MediaControllerCompat.getMediaController(this@MainActivity)
 
             if (controller.playbackState != null) {
+                mainViewModel.setController(controller)
                 if (controller.playbackState.state == PlaybackStateCompat.STATE_PAUSED) {
                     binding.playPauseButton.setImageResource(R.drawable.play_arrow)
                 }
