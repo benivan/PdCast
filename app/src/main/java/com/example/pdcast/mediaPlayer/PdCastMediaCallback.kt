@@ -90,9 +90,9 @@ class PdCastMediaCallback(
         mediaPlayer?.seekTo(pos.toInt())
 
         Log.d(TAG, "onSeekTo: $pos")
-        val playbackState: PlaybackStateCompat? = mediaSession.controller.playbackState
 
-        if (playbackState != null) {
+
+        if (mediaSession.controller.playbackState != null) {
             setState(PlaybackStateCompat.STATE_PLAYING)
 
         } else {
