@@ -22,10 +22,11 @@
         app:defaultNavHost="true"
         app:layout_constraintBottom_toTopOf="@+id/bottomPlayerLayout"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0"
         app:navGraph="@navigation/nav_graph" />
-
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/bottomPlayerLayout"
@@ -37,7 +38,7 @@
         app:layout_constraintStart_toStartOf="parent">
 
         <ImageView
-            android:layout_marginLeft="8dp"
+            android:layout_marginStart="8dp"
             android:id="@+id/bottomPlayImage"
             android:layout_width="50dp"
             android:layout_height="50dp"
@@ -46,7 +47,8 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            tools:srcCompat="@tools:sample/avatars" />
+            tools:srcCompat="@tools:sample/avatars"
+            android:contentDescription="" />
 
         <ImageButton
             android:id="@+id/playPauseButton"
@@ -56,6 +58,7 @@
             android:layout_marginTop="4dp"
             android:background="@drawable/play_button_background"
             android:clickable="true"
+            android:hapticFeedbackEnabled="true"
             android:foreground="@drawable/episode_play_button_foreground"
             android:src="@drawable/play_arrow_black"
             android:text="play"
@@ -65,7 +68,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
 
             />
-
+t08654
         <ImageButton
             android:id="@+id/preButton"
             android:layout_width="50dp"
@@ -81,7 +84,8 @@
             app:layout_constraintLeft_toRightOf="@+id/bottomPlayImage"
             app:layout_constraintRight_toLeftOf="@id/playPauseButton"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"/>
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:contentDescription="TODO" />
 
         <ImageButton
             android:id="@+id/forButton"
@@ -96,14 +100,26 @@
             app:layout_constraintLeft_toRightOf="@id/playPauseButton"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/bottomPlayerGuidedLine"/>
+            app:layout_constraintRight_toLeftOf="@id/heartButton"
+            android:focusable="true" />
 
-        <androidx.constraintlayout.widget.Guideline
-            android:id="@+id/bottomPlayerGuidedLine"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            app:layout_constraintGuide_end="88dp" />
+        <ImageButton
+            android:id="@+id/heartButton"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_gravity="center"
+            android:layout_marginTop="4dp"
+            android:layout_marginEnd="8dp"
+            android:background="@drawable/custom_circular_transparent_backgroung"
+            android:clickable="true"
+            android:src="@drawable/up_arrow"
+            app:layout_constraintLeft_toRightOf="@id/playPauseButton"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:focusable="true" />
+
+
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
