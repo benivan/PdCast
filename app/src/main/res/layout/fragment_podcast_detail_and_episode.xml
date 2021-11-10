@@ -81,6 +81,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/tvDescription"
                 app:layout_constraintVertical_bias="0.0"
+                android:overScrollMode="never"
                 tools:itemCount="2"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                 tools:listitem="@layout/episode_items" />
