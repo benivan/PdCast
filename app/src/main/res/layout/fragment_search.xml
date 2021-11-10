@@ -16,11 +16,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginVertical="20dp"
-            android:text="TextView"
             android:textSize="20sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/searchTextInput" />
+            app:layout_constraintTop_toBottomOf="@+id/searchTextInput"
+            tools:text="TextView" />
 
         <ProgressBar
             android:id="@+id/progressBar"
@@ -43,30 +43,55 @@
             app:layout_constraintTop_toBottomOf="@+id/progressBar"
             app:layout_goneMarginTop="20dp"
             tools:listitem="@layout/podcast_search_view_item" />
+        <TextView
+            android:id="@+id/searchText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Search"
+            android:textColor="@color/black"
+            android:textStyle="bold"
+            android:textSize="30sp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            app:layout_constraintHorizontal_bias="0"
+            app:layout_constraintVertical_bias="0"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/searchTextInput"/>
 
         <EditText
             android:id="@+id/searchTextInput"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="12dp"
-            android:ems="10"
+            android:layout_marginStart="16dp"
+            android:paddingVertical="4dp"
+            android:background="@drawable/search_background"
+            android:elevation="4dp"
+            android:hint=" Podcast name"
+            android:textColorHint="@color/grey"
             android:imeOptions="actionSearch"
             android:inputType="textPersonName"
-            app:layout_constraintEnd_toStartOf="@+id/btnSearch"
+            android:paddingStart="20dp"
+            android:textSize="28sp"
+            android:textCursorDrawable="@drawable/search_custom_cursor"
+            app:layout_constraintBottom_toTopOf="@+id/recyclerView"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toTopOf="@+id/recyclerView"/>
+            app:layout_constraintTop_toBottomOf="@id/searchText"
+            app:layout_constraintWidth_percent=".7" />
 
         <ImageButton
             android:id="@+id/btnSearch"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="8dp"
-            android:background="@android:drawable/ic_menu_search"
-            android:text="Search"
-            app:layout_constraintBottom_toTopOf="@+id/recyclerView"
+            android:layout_marginStart="18dp"
+            android:background="@drawable/search_icon"
+            app:layout_constraintHorizontal_bias="0"
+            app:layout_constraintVertical_bias=".5"
+            app:layout_constraintBottom_toBottomOf="@+id/searchTextInput"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintStart_toEndOf="@+id/searchTextInput"
+            app:layout_constraintTop_toTopOf="@+id/searchTextInput" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/floatingActionButton"
