@@ -1,12 +1,9 @@
 package com.example.pdcast.ui.view
 
 
-import android.graphics.PorterDuff
 import android.util.Log
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import androidx.annotation.NonNull
 import androidx.recyclerview.widget.RecyclerView
 import com.example.pdcast.data.response.RssFeedResponse
 import com.example.pdcast.databinding.EpisodeItemsBinding
@@ -37,9 +34,9 @@ class EpisodeItemAdapter(
         return episodes.size
     }
 
-    fun removeColon(duration: String):String{
-        return if(duration.contains(":")){
-            duration.replace(":","")
+    fun removeColon(duration: String): String {
+        return if (duration.contains(":")) {
+            duration.replace(":", "")
         } else duration
     }
 
@@ -49,9 +46,11 @@ class EpisodeItemAdapter(
         fun bind(currentItem: RssFeedResponse.EpisodeResponse) {
             binding.tvTitle.text = currentItem.title
             binding.tvDescription.text =
-                currentItem.description?.replace("\\<.*?\\>".toRegex(), "") ?:currentItem.description
+                currentItem.description?.replace("\\<.*?\\>".toRegex(), "")
+                    ?: currentItem.description
             binding.tvPubdate.text = currentItem.pubDate
-            binding.duration.text = currentItem.duration
+            binding.duration.text =
+                currentItem.duration?.let { convertSecondIntoDuration(it.toInt()) }
             binding.play.setOnClickListener {
                 Log.d(TAG, "bind-Link: ${currentItem.episodeUrl}")
                 episodeListener.onEpisodeClicked(currentItem)
@@ -63,6 +62,34 @@ class EpisodeItemAdapter(
     companion object {
         private const val TAG = "EpisodeItemAdapter"
     }
+
+    private fun convertSecondIntoDuration(duration: Int): String {
+        var time = duration
+        var convertedDuration: String = ""
+
+        val hour = time / 3600
+
+        time %= 3600
+        val min = time / 60
+
+        time %= 60
+        val second = time
+
+
+        convertedDuration = if (hour == 0) {
+            "${addZero(min)}:${addZero(second)}"
+        } else "${addZero(hour)}:${addZero(min)}:${addZero(second)}"
+
+        return convertedDuration
+    }
+
+    private fun addZero(time: Int): String {
+        return if (time.toString().length == 1) {
+            "0$time"
+        } else time.toString()
+
+    }
+
 }
 
 interface EpisodeListener {
