@@ -1,6 +1,7 @@
 package com.example.pdcast
 
 import android.content.*
+import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaMetadataCompat
@@ -11,6 +12,7 @@ import android.util.Log
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.core.graphics.drawable.toDrawable
 import androidx.core.net.toUri
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
@@ -21,6 +23,7 @@ import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.onNavDestinationSelected
 import androidx.navigation.ui.setupWithNavController
+import androidx.palette.graphics.Palette
 import com.bumptech.glide.Glide
 import com.example.pdcast.data.api.RssFeedService
 import com.example.pdcast.data.database.PodcastSubscribedDatabase
@@ -31,8 +34,15 @@ import com.example.pdcast.mediaPlayer.MediaPlaybackService
 import com.example.pdcast.ui.MainViewModel
 import com.example.pdcast.ui.MainViewModelFactory
 import com.example.pdcast.util.PState
+import com.example.pdcast.util.PaletteColor
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
+import java.net.URL
+import kotlin.coroutines.resumeWithException
 
 
 class MainActivity : AppCompatActivity() {
@@ -51,8 +61,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var rssFeedPodcastRepository: RssFeedPodcastRepository
 
-    lateinit var mainViewModel:MainViewModel
-
+    lateinit var mainViewModel: MainViewModel
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -63,6 +72,7 @@ class MainActivity : AppCompatActivity() {
         }
         setContentView(binding.root)
 
+
         val podcastSubscribeDao =
             PodcastSubscribedDatabase.getDatabase(this).podcastSubscribeDao()
         podcastRepository = PodcastRepository(podcastSubscribeDao)
@@ -71,11 +81,11 @@ class MainActivity : AppCompatActivity() {
 
         val rssFeedPodcastDao =
             PodcastSubscribedDatabase.getDatabase(this).rssFeedPodcastDao()
-        rssFeedPodcastRepository = RssFeedPodcastRepository(rssFeedPodcastDao,rssFeedService)
+        rssFeedPodcastRepository = RssFeedPodcastRepository(rssFeedPodcastDao, rssFeedService)
 
 
-        val viewModelFactory =  MainViewModelFactory(rssFeedPodcastRepository,application)
-        mainViewModel = ViewModelProvider(this,viewModelFactory)[MainViewModel::class.java]
+        val viewModelFactory = MainViewModelFactory(rssFeedPodcastRepository, application)
+        mainViewModel = ViewModelProvider(this, viewModelFactory)[MainViewModel::class.java]
 
         val navHostFragment = supportFragmentManager
             .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
@@ -101,7 +111,24 @@ class MainActivity : AppCompatActivity() {
                 }
             }.launchIn(lifecycleScope)
 
-            setListeners()
+        //Palette Color from mainViewModel
+        mainViewModel.paletteColor.onEach {
+            val  color = it.vibrant.toDrawable()
+            color.alpha = 225/6
+            binding.bottomPlayerLayout.background  = color
+        }.launchIn(lifecycleScope)
+
+        val sharedPref = this@MainActivity.getSharedPreferences(
+            getString(R.string.preference_file_key), Context.MODE_PRIVATE
+        )
+        val nowPlayingMediaImage = sharedPref.getString("NowPlayingMediaImage", "")
+        CoroutineScope(Dispatchers.IO).launch {
+            val a = getPaletteColor(nowPlayingMediaImage)
+            Log.d(TAG, "onMetadataChanged: $a")
+            mainViewModel.paletteColor(a)
+        }
+
+        setListeners()
         binding.bottomPlayerLayout.isVisible = previouslyPlayedData()
 
     }
@@ -233,26 +260,29 @@ class MainActivity : AppCompatActivity() {
                 "metadata changed to " +
                         "${metadata?.getString(MediaMetadataCompat.METADATA_KEY_MEDIA_URI)}"
             )
+
+            val sharedPref = this@MainActivity.getSharedPreferences(
+                getString(R.string.preference_file_key), Context.MODE_PRIVATE
+            )
+            val nowPlayingMediaImage = sharedPref.getString("NowPlayingMediaImage", "")
+            CoroutineScope(Dispatchers.IO).launch {
+                val a = getPaletteColor(nowPlayingMediaImage)
+                Log.d(TAG, "onMetadataChanged: $a")
+                mainViewModel.paletteColor(a)
+            }
+
+
         }
 
         override fun onPlaybackStateChanged(state: PlaybackStateCompat?) {
-
+            super.onPlaybackStateChanged(state)
             if (state?.state == PlaybackStateCompat.STATE_PAUSED) {
                 binding.playPauseButton.setImageResource(R.drawable.play_arrow)
             }
             if (state?.state == PlaybackStateCompat.STATE_PLAYING) {
                 binding.playPauseButton.setImageResource(R.drawable.pause)
             }
-            super.onPlaybackStateChanged(state)
         }
-    }
-
-    override fun onStart() {
-        super.onStart()
-        Log.d(TAG, "onStart: ")
-        navController.addOnDestinationChangedListener(navDestinationChangedListener)
-        val intentFilter = IntentFilter(MediaPlaybackService.PREPARED)
-        registerReceiver(preparedListener, intentFilter)
     }
 
 
@@ -276,13 +306,14 @@ class MainActivity : AppCompatActivity() {
 
 
             if (previouslyPlayedData()) {
-
                 val sharedPref = this@MainActivity.getSharedPreferences(
                     getString(R.string.preference_file_key), Context.MODE_PRIVATE
                 )
                 val nowPlayingMediaImage = sharedPref.getString("NowPlayingMediaImage", "")
-                Glide.with(this@MainActivity).load(nowPlayingMediaImage)
+
+                Glide.with(binding.bottomPlayImage).load(nowPlayingMediaImage)
                     .into(binding.bottomPlayImage)
+
             }
             println("onConnected")
         }
@@ -298,6 +329,17 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    override fun onStart() {
+        super.onStart()
+        Log.d(TAG, "onStart: ")
+        navController.addOnDestinationChangedListener(navDestinationChangedListener)
+        val intentFilter = IntentFilter(MediaPlaybackService.PREPARED)
+        registerReceiver(preparedListener, intentFilter)
+        CoroutineScope(Dispatchers.IO).launch {
+
+
+        }
+    }
 
     override fun onResume() {
         super.onResume()
@@ -343,7 +385,6 @@ class MainActivity : AppCompatActivity() {
     private val preparedListener = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             intent?.let {
-
                 if (it.getBooleanExtra("MEDIA_PREPARED", false)) {
                     Log.d(TAG, "onReceive: prepared media player")
                     if (previouslyPlayedData()) {
@@ -365,14 +406,41 @@ class MainActivity : AppCompatActivity() {
                     Log.d(TAG, "onReceive: state is ${PState.of(state)}")
                     if (state == 2) mainViewModel.setPlaying(false)
                     if (state == 3) mainViewModel.setPlaying(true)
-                }else if(it.hasExtra("BUFFERING_LEVEL")){
+                } else if (it.hasExtra("BUFFERING_LEVEL")) {
                     mainViewModel.bufferingLevel(
-                        it.getIntExtra("BUFFERING_LEVEL",0)
+                        it.getIntExtra("BUFFERING_LEVEL", 0)
                     )
                 }
                 Unit
             }
         }
+    }
+
+
+    private suspend fun getPaletteColor(uri: String?) = suspendCancellableCoroutine<PaletteColor> {
+        try {
+            val bitmap =
+                URL(uri).openStream().use { stream ->
+                    BitmapFactory.decodeStream(stream)
+                }
+            Palette.from(bitmap).generate { palette ->
+                val colorPalette = PaletteColor(
+                    vibrant = palette!!.getVibrantColor(0x000000),
+                    vibrantLight = palette.getLightVibrantColor(0x000000),
+                    vibrantDark = palette.getDarkVibrantColor(0x000000),
+                    muted = palette.getMutedColor(0x000000),
+                    mutedLight = palette.getLightMutedColor(0x000000),
+                    mutedDark = palette.getDarkMutedColor(0x000000)
+                )
+                it.resumeWith(Result.success(colorPalette))
+            }
+
+
+        } catch (e: Exception) {
+            it.resumeWithException(e)
+        }
+
+
     }
 
 
