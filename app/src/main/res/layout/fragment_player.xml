@@ -2,12 +2,13 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:background="@color/white"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ui.view.PlayerFragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:background="@color/exo_white"
+        android:id="@+id/playerConstraintLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
