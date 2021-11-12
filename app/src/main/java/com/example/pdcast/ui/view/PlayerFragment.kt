@@ -1,29 +1,27 @@
 package com.example.pdcast.ui.view
 
-import android.content.BroadcastReceiver
 import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
+import android.os.Build
 import android.os.Bundle
 import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.SeekBar
+import androidx.annotation.RequiresApi
+import androidx.core.graphics.drawable.toDrawable
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
 import com.example.pdcast.R
 import com.example.pdcast.databinding.FragmentPlayerBinding
-import com.example.pdcast.mediaPlayer.MediaPlaybackService
 import com.example.pdcast.ui.MainViewModel
 import com.example.pdcast.ui.PlayerViewModel
 import com.google.android.material.transition.MaterialFadeThrough
-import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 
@@ -45,13 +43,11 @@ class PlayerFragment : Fragment() {
         _binding = FragmentPlayerBinding.inflate(layoutInflater, container, false)
 
         mainViewModel.getController()?.let { viewModel.currentPosition(it) }
-
-        val intentFilter = IntentFilter(MediaPlaybackService.PREPARED)
-        requireActivity().registerReceiver(preparedListener, intentFilter)
         return binding.root
     }
 
 
+    @RequiresApi(Build.VERSION_CODES.Q)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -72,7 +68,6 @@ class PlayerFragment : Fragment() {
                 binding.startDuration.text =
                     convertSecondIntoDuration(data.elementAt(4)!!.toInt() / 1000)
             }
-
 
             binding.playerPlayPauseButton.setOnClickListener {
 
@@ -103,6 +98,14 @@ class PlayerFragment : Fragment() {
             }
         }
 
+        mainViewModel.paletteColor.onEach {
+            val color = it.muted.toDrawable()
+            color.alpha = 255 / 3
+            binding.playerConstraintLayout.background = color
+//            binding.playerSeekBar.horizontalScrollbarThumbDrawable = it.mutedDark.toDrawable()
+////            binding.playerSeekBar.progressDrawable = it.mutedDark.toDrawable()
+        }.launchIn(lifecycleScope)
+
         mainViewModel.isPlaying
             .onEach {
                 if (it) binding.playerPlayPauseButton.setImageResource(R.drawable.pause)
@@ -112,26 +115,37 @@ class PlayerFragment : Fragment() {
         mainViewModel.bufferLevel
             .onEach {
                 binding.playerSeekBar.secondaryProgress = it
-            }
+            }.launchIn(lifecycleScope)
 
-        viewModel.position
+        mainViewModel.currentPlayingPosition
             .onEach {
-                if (it == 0) {
-                    val position = getPositionFromShared()
-                    binding.playerSeekBar.progress = position
-                    binding.startDuration.text =
-                        convertSecondIntoDuration(position / 1000)
-                } else {
-                    binding.playerSeekBar.progress = it
-                    binding.startDuration.text =
-                        convertSecondIntoDuration(it / 1000)
-                }
+
+                binding.playerSeekBar.progress = it.toInt()
+                binding.startDuration.text =
+                    convertSecondIntoDuration((it / 1000).toInt())
+
             }.launchIn(lifecycleScope)
 
         binding.playerSeekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 if (fromUser) {
                     mainViewModel.getController()?.transportControls?.seekTo(progress.toLong())
+                    if (mainViewModel.getController()?.playbackState == null) {
+                        val sharedPref = requireActivity().getSharedPreferences(
+                            getString(R.string.preference_file_key), Context.MODE_PRIVATE
+                        )
+                        with(sharedPref.edit()) {
+                            putLong("NowPlayingPosition", progress.toLong())
+                            apply()
+                        }
+                    }
+                    if (mainViewModel.getController()?.playbackState?.state == PlaybackStateCompat.STATE_PAUSED) {
+
+                        binding.playerSeekBar.progress = progress
+                        binding.startDuration.text = convertSecondIntoDuration(progress / 1000)
+                        mainViewModel.getController()?.transportControls?.play()
+                    }
+                    binding.startDuration.text = convertSecondIntoDuration(progress / 1000)
                     binding.playerSeekBar.progress = progress
                 }
             }
@@ -144,11 +158,6 @@ class PlayerFragment : Fragment() {
 
     }
 
-
-    override fun onStop() {
-        super.onStop()
-        requireActivity().unregisterReceiver(preparedListener)
-    }
 
     override fun onResume() {
         Log.d(TAG, "onResume: ")
@@ -193,18 +202,6 @@ class PlayerFragment : Fragment() {
     }
 
 
-    private val preparedListener = object : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent?) {
-            intent?.let {
-
-                if (it.getBooleanExtra("MEDIA_PREPARED", false)) {
-                    viewModel.currentPosition(mainViewModel.getController()!!)
-                }
-                Unit
-            }
-        }
-    }
-
     private fun convertSecondIntoDuration(duration: Int): String {
         var time = duration
         var convertedDuration: String = ""
@@ -217,8 +214,17 @@ class PlayerFragment : Fragment() {
         time %= 60
         val second = time
 
-        convertedDuration = "$hour:$min:$second"
+        convertedDuration = if (hour == 0) {
+            "${addZero(min)}:${addZero(second)}"
+        } else "${addZero(hour)}:${addZero(min)}:${addZero(second)}"
         return convertedDuration
+    }
+
+    private fun addZero(time: Int): String {
+        return if (time.toString().length == 1) {
+            "0$time"
+        } else time.toString()
+
     }
 
 
