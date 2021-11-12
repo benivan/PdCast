@@ -1,29 +1,25 @@
 package com.example.pdcast.ui
 
 import android.app.Application
-import android.icu.text.CaseMap
 import android.support.v4.media.session.MediaControllerCompat
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.asFlow
 import androidx.lifecycle.viewModelScope
-import com.example.pdcast.data.database.PodcastSubscribedDatabase
-import com.example.pdcast.data.dto.DBPodcast
 import com.example.pdcast.data.dto.DBPodcastsEpisodes
 import com.example.pdcast.data.dto.DBRssFeedPodcast
 import com.example.pdcast.data.dto.relations.PodcastsWithEpisodes
-import com.example.pdcast.data.repository.PodcastRepository
 import com.example.pdcast.data.repository.RssFeedPodcastRepository
 import com.example.pdcast.data.response.RssFeedResponse
+import com.example.pdcast.util.PaletteColor
 import com.example.pdcast.util.Resource
-import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlin.coroutines.resumeWithException
-import kotlin.system.measureTimeMillis
 
 
 class MainViewModel(
@@ -37,17 +33,22 @@ class MainViewModel(
     var podcastsWithEpisodes: LiveData<List<PodcastsWithEpisodes>>? = null
 
     private val _podcast = MutableSharedFlow<Resource<RssFeedResponse>>(0)
-
     val podcast: SharedFlow<Resource<RssFeedResponse>> = _podcast.asSharedFlow()
 
-    private var controller : MediaControllerCompat? = null
+    private var controller: MediaControllerCompat? = null
+
+    private val _currentPlayingPosition = MutableSharedFlow<Long>(1)
+    var currentPlayingPosition = _currentPlayingPosition.asSharedFlow()
+
+    private val _paletteColor = MutableSharedFlow<PaletteColor>(1)
+    var paletteColor = _paletteColor.asSharedFlow()
 
 
     private val _isPlaying: MutableSharedFlow<Boolean> = MutableSharedFlow(1)
     val isPlaying = _isPlaying.asSharedFlow()
 
-    private val _bufferLevel:MutableSharedFlow<Int> = MutableSharedFlow(0)
-    val bufferLevel  = _bufferLevel.asSharedFlow()
+    private val _bufferLevel: MutableSharedFlow<Int> = MutableSharedFlow(0)
+    val bufferLevel = _bufferLevel.asSharedFlow()
 
     private val _playFromUri: MutableSharedFlow<Boolean> = MutableSharedFlow(1)
 
@@ -55,9 +56,30 @@ class MainViewModel(
 
     fun setController(controllerCompat: MediaControllerCompat) {
         controller = controllerCompat
+        viewModelScope.launch {
+            controllerCompat.playbackState.position.let {
+                if(it > 999L){
+                    Log.d(TAG, "setController: $it")
+                    _currentPlayingPosition.emit(it)
+                }
+            }
+
+            delay(1000)
+            setController(controllerCompat)
+        }
+
     }
+
     fun getController(): MediaControllerCompat? {
+
         return controller
+    }
+
+    fun paletteColor(paletteColor: PaletteColor){
+        viewModelScope.launch {
+            _paletteColor.emit(paletteColor)
+        }
+
     }
 
 
@@ -69,10 +91,9 @@ class MainViewModel(
         _playFromUri.emit(isPlayFromUri)
     }
 
-    fun getRssFeedPodcastRepository():RssFeedPodcastRepository{
+    fun getRssFeedPodcastRepository(): RssFeedPodcastRepository {
         return rssFeedPodcastRepository
     }
-
 
 
     fun addRssPodcast(podcast: DBRssFeedPodcast, callback: (Long) -> Unit) {
