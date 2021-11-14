@@ -57,8 +57,7 @@
             android:layout_marginHorizontal="4dp"
             app:layout_constraintTop_toBottomOf="@+id/PodcastName"
             app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
-            android:secondaryProgressTint="@color/exo_black_opacity_60"
+            app:layout_constraintRight_toRightOf="parent" android:secondaryProgressTint="@color/purple_500"
             />
 
         <ImageButton
