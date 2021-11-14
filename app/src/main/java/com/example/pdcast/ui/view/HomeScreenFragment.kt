@@ -53,7 +53,6 @@ class HomeScreenFragment : Fragment() {
         enterTransition = MaterialFadeThrough()
         exitTransition = MaterialFadeThrough()
 
-        val dataMapper = DataMapper()
 
 
         mainViewModel.readAllPodcast.onEach { listOfPodcast ->
