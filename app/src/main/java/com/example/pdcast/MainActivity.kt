@@ -16,6 +16,7 @@ import androidx.core.graphics.drawable.toDrawable
 import androidx.core.net.toUri
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.NavController.OnDestinationChangedListener
@@ -265,12 +266,18 @@ class MainActivity : AppCompatActivity() {
                 getString(R.string.preference_file_key), Context.MODE_PRIVATE
             )
             val nowPlayingMediaImage = sharedPref.getString("NowPlayingMediaImage", "")
+
+            Glide.with(binding.bottomPlayImage).load(nowPlayingMediaImage).into(binding.bottomPlayImage)
+
+
+            Log.d(TAG, "onMetadataChanged: ${mainViewModel.currentPlayingPosition.replayCache}")
+
             CoroutineScope(Dispatchers.IO).launch {
                 val a = getPaletteColor(nowPlayingMediaImage)
                 Log.d(TAG, "onMetadataChanged: $a")
                 mainViewModel.paletteColor(a)
             }
-
+            
 
         }
 
