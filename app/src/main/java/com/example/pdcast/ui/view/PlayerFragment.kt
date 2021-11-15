@@ -63,6 +63,7 @@ class PlayerFragment : Fragment() {
             binding.endDuration.text = convertSecondIntoDuration(data.elementAt(3)!!.toInt())
             binding.playerSeekBar.max = data.elementAt(3)!!.toInt() * 1000
 
+
             if (mainViewModel.getController()?.playbackState == null) {
                 binding.playerSeekBar.progress = data.elementAt(4)?.toInt() ?: 0
                 binding.startDuration.text =
@@ -99,9 +100,15 @@ class PlayerFragment : Fragment() {
         }
 
         mainViewModel.paletteColor.onEach {
-            val color = it.muted.toDrawable()
-            color.alpha = 255 / 3
-            binding.playerConstraintLayout.background = color
+            val vibrant = it.vibrant.toDrawable()
+            val vibrantLight = it.vibrantLight.toDrawable()
+            val vibrantDark = it.vibrantDark.toDrawable()
+            val muted = it.muted.toDrawable()
+            val mutedLight = it.mutedLight.toDrawable()
+            val mutedDark = it.mutedDark.toDrawable()
+
+
+
 //            binding.playerSeekBar.horizontalScrollbarThumbDrawable = it.mutedDark.toDrawable()
 ////            binding.playerSeekBar.progressDrawable = it.mutedDark.toDrawable()
         }.launchIn(lifecycleScope)
