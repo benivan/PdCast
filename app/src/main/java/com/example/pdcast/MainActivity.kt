@@ -123,11 +123,14 @@ class MainActivity : AppCompatActivity() {
             getString(R.string.preference_file_key), Context.MODE_PRIVATE
         )
         val nowPlayingMediaImage = sharedPref.getString("NowPlayingMediaImage", "")
-        CoroutineScope(Dispatchers.IO).launch {
-            val a = getPaletteColor(nowPlayingMediaImage)
-            Log.d(TAG, "onMetadataChanged: $a")
-            mainViewModel.paletteColor(a)
+        if(previouslyPlayedData()){
+            CoroutineScope(Dispatchers.IO).launch {
+                val a = getPaletteColor(nowPlayingMediaImage)
+                Log.d(TAG, "onMetadataChanged: $a")
+                mainViewModel.paletteColor(a)
+            }
         }
+
 
         setListeners()
         binding.bottomPlayerLayout.isVisible = previouslyPlayedData()
@@ -277,7 +280,7 @@ class MainActivity : AppCompatActivity() {
                 Log.d(TAG, "onMetadataChanged: $a")
                 mainViewModel.paletteColor(a)
             }
-            
+
 
         }
 
@@ -361,6 +364,8 @@ class MainActivity : AppCompatActivity() {
         } else {
             mediaBrowser.connect()
         }
+
+
 
     }
 
