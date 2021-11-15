@@ -2,13 +2,14 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:background="@color/white"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#060609"
     tools:context=".ui.view.PlayerFragment">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/playerConstraintLayout"
+        android:background="#28FAF9F9"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
@@ -27,10 +28,11 @@
             android:id="@+id/podcastEpisodeName"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:gravity="center"
-            android:layout_marginTop="32dp"
             android:layout_marginHorizontal="16dp"
+            android:layout_marginTop="32dp"
+            android:gravity="center"
             android:text="TextView"
+            android:textColor="@color/white"
             android:textSize="18sp"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
@@ -40,25 +42,27 @@
             android:id="@+id/PodcastName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:gravity="center"
-            android:layout_marginTop="4dp"
             android:layout_marginHorizontal="4dp"
+            android:layout_marginTop="4dp"
+            android:gravity="center"
             android:text="TextView"
+            android:textColor="@color/white"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/podcastEpisodeName" />
 
         <SeekBar
             android:id="@+id/playerSeekBar"
-            android:padding="0dp"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
             android:layout_marginHorizontal="4dp"
-            app:layout_constraintTop_toBottomOf="@+id/PodcastName"
+            android:layout_marginTop="16dp"
+            android:padding="0dp"
+            android:secondaryProgressTint="@color/purple_500"
+            android:splitTrack="false"
             app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent" android:secondaryProgressTint="@color/purple_500"
-            />
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/PodcastName" />
 
         <ImageButton
             android:id="@+id/playerPreButton"
@@ -84,8 +88,8 @@
             android:layout_marginTop="16dp"
             android:background="@drawable/play_button_background"
             android:clickable="true"
-            android:hapticFeedbackEnabled="true"
             android:foreground="@drawable/episode_play_button_foreground"
+            android:hapticFeedbackEnabled="true"
             android:src="@drawable/play_arrow_black"
             android:text="play"
             app:layout_constraintEnd_toStartOf="@+id/playerForButton"
@@ -112,22 +116,22 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:textSize="12sp"
             android:text="00:00"
-            app:layout_constraintTop_toBottomOf="@+id/playerSeekBar"
+            android:textColor="@color/white"
+            android:textSize="12sp"
             app:layout_constraintLeft_toLeftOf="parent"
-            />
+            app:layout_constraintTop_toBottomOf="@+id/playerSeekBar" />
 
         <TextView
             android:id="@+id/endDuration"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="16dp"
-            android:textSize="12sp"
             android:text="00:00"
+            android:textColor="@color/white"
+            android:textSize="12sp"
             app:layout_constraintEnd_toEndOf="parent"
-           app:layout_constraintTop_toBottomOf="@+id/playerSeekBar"
-             />
+            app:layout_constraintTop_toBottomOf="@+id/playerSeekBar" />
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>
