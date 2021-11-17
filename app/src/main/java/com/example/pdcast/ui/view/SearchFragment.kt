@@ -53,8 +53,7 @@ class SearchFragment : Fragment() {
         }
 
 
-        viewModel.podcasts
-            .flowWithLifecycle(lifecycle)
+        viewModel.podcasts.flowWithLifecycle(lifecycle)
             .onEach {
                 when (it) {
                     is Resource.Failure -> {
