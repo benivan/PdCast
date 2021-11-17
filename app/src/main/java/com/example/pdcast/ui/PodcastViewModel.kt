@@ -38,8 +38,7 @@ class PodcastViewModel() : ViewModel() {
             _podcast.emit(Resource.Loading())
             try {
                 Log.d(TAG, "getPodcastWithFeedUrl: ")
-                rssFeedPodcastRepository.getPodcastFromFeed(feedUrl).collect {
-                    val podcast = it.first()
+                rssFeedPodcastRepository.getPodcastFromFeed(feedUrl).collect {podcast ->
                     _podcast.emit(Resource.Success(
                         RssFeedResponse(
                             title = podcast.podcast.title,
