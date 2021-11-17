@@ -18,6 +18,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
+import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.pdcast.data.dto.DBPodcastsEpisodes
 import com.example.pdcast.data.dto.DBRssFeedPodcast
@@ -96,6 +97,8 @@ class PodcastDetailAndEpisodeFragment : Fragment() {
         binding.rvEpisode.adapter = episodeAdapter
 
 
+
+
         viewModel.podcast.flowWithLifecycle(lifecycle).onEach {
             when (it) {
                 is Resource.Failure -> {
@@ -128,9 +131,7 @@ class PodcastDetailAndEpisodeFragment : Fragment() {
                             index, episodeResponse ->  index<=sizeOfPodcastEpisode
                         })
                     }else{
-                        episodeAdapter.submitList(it.data.episodes.filterIndexed{
-                                index, episodeResponse ->  index<=5
-                        })
+                        episodeAdapter.submitList(it.data.episodes)
                     }
 
 
@@ -139,7 +140,6 @@ class PodcastDetailAndEpisodeFragment : Fragment() {
         }.catch { e ->
             e.printStackTrace()
         }.launchIn(lifecycleScope)
-
 
 
     }
@@ -203,7 +203,7 @@ class PodcastDetailAndEpisodeFragment : Fragment() {
         episodeViewData.duration?.let { removeColon(it) }?.let {
             bundle.putLong(
                 MediaMetadata.METADATA_KEY_DURATION,
-                it
+                it*1000L
             )
         }
 
@@ -211,6 +211,7 @@ class PodcastDetailAndEpisodeFragment : Fragment() {
             Uri.parse(episodeViewData.episodeUrl),
             bundle
         )
+
         Log.d(TAG, "startPlaying: This is called ${episodeViewData.episodeUrl} HERE WE GOOOO!!")
     }
 
