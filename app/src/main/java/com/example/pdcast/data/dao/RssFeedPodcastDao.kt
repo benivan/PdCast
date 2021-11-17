@@ -1,6 +1,7 @@
 package com.example.pdcast.data.dao
 
 import androidx.lifecycle.LiveData
+import androidx.paging.PagingSource
 import androidx.room.*
 import com.example.pdcast.data.dto.DBPodcastsEpisodes
 import com.example.pdcast.data.dto.DBRssFeedPodcast
@@ -21,11 +22,15 @@ interface RssFeedPodcastDao {
 
     @Transaction
     @Query("SELECT * FROM podcast_table WHERE podcastId =:podcastId")
-    fun getEpisodeWithPodcast(podcastId: Long): Flow<List<PodcastsWithEpisodes>>
+     fun getEpisodeWithPodcast(podcastId: Long): Flow<PodcastsWithEpisodes>
+
+    @Transaction
+    @Query("SELECT * FROM podcasts_episodes_table WHERE podcastId =:podcastId")
+    fun pagingSourceEpisodesWithPodcastId(podcastId: Long): PagingSource<Int,DBPodcastsEpisodes>
 
     @Transaction
     @Query("SELECT * FROM podcast_table WHERE title=:podcastTitle")
-    fun getEpisodeWithPodcast(podcastTitle: String): Flow<List<PodcastsWithEpisodes>>
+    fun getEpisodeWithPodcast(podcastTitle: String): Flow<PodcastsWithEpisodes>
 
     @Query("SELECT podcastId from podcast_table Where podcastFeedUrl=:feedLink")
     fun getPodcastIdWithFeedUrl(feedLink: String): Long?
