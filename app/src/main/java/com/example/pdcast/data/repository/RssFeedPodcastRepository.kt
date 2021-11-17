@@ -25,7 +25,7 @@ class RssFeedPodcastRepository(
     val readAllPodcast: Flow<List<DBRssFeedPodcast>> =
         rssFeedPodcastDao.getAllPodcasts()
 
-    suspend fun getPodcastFromFeed(feedLink: String): Flow<List<PodcastsWithEpisodes>>{
+    suspend fun getPodcastFromFeed(feedLink: String): Flow<PodcastsWithEpisodes>{
         return withContext(Dispatchers.IO) {
             val podcastId = try {
                 getPodcastIdWithFeedUrl(feedLink)!!
@@ -83,7 +83,7 @@ class RssFeedPodcastRepository(
 //        return rssFeedPodcastDao.getEpisodeWithPodcast(podcastTitle)
 //    }
 
-    private suspend fun readPodcastsWithEpisodes(id: Long): Flow<List<PodcastsWithEpisodes>> {
+    private suspend fun readPodcastsWithEpisodes(id: Long): Flow<PodcastsWithEpisodes>{
         Log.d(TAG, "readPodcastsWithEpisodes: ")
         return rssFeedPodcastDao.getEpisodeWithPodcast(id)
     }
