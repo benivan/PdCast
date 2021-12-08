@@ -74,9 +74,9 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
 
-        val podcastSubscribeDao =
-            PodcastSubscribedDatabase.getDatabase(this).podcastSubscribeDao()
-        podcastRepository = PodcastRepository(podcastSubscribeDao)
+//        val podcastSubscribeDao =
+//            PodcastSubscribedDatabase.getDatabase(this).podcastSubscribeDao()
+//        podcastRepository = PodcastRepository(podcastSubscribeDao)
 
         val rssFeedService = RssFeedService
 
@@ -113,18 +113,19 @@ class MainActivity : AppCompatActivity() {
             }.launchIn(lifecycleScope)
 
         //Palette Color from mainViewModel
-        mainViewModel.paletteColor.onEach {
-            val  color = it.vibrant.toDrawable()
-            color.alpha = 225/6
-            binding.bottomPlayerLayout.background  = color
+        mainViewModel.paletteColor.flowWithLifecycle(lifecycle).onEach {
+            val color = it.vibrant.toDrawable()
+            color.alpha = 225 / 6
+            binding.bottomPlayerLayout.background = color
         }.launchIn(lifecycleScope)
 
         val sharedPref = this@MainActivity.getSharedPreferences(
             getString(R.string.preference_file_key), Context.MODE_PRIVATE
         )
         val nowPlayingMediaImage = sharedPref.getString("NowPlayingMediaImage", "")
-        if(previouslyPlayedData()){
+        if (previouslyPlayedData()) {
             CoroutineScope(Dispatchers.IO).launch {
+                Log.d(TAG, "onCreate: $nowPlayingMediaImage")
                 val a = getPaletteColor(nowPlayingMediaImage)
                 Log.d(TAG, "onMetadataChanged: $a")
                 mainViewModel.paletteColor(a)
@@ -260,28 +261,24 @@ class MainActivity : AppCompatActivity() {
     inner class MediaControllerCallback : MediaControllerCompat.Callback() {
         override fun onMetadataChanged(metadata: MediaMetadataCompat?) {
             super.onMetadataChanged(metadata)
-            println(
-                "metadata changed to " +
-                        "${metadata?.getString(MediaMetadataCompat.METADATA_KEY_MEDIA_URI)}"
-            )
+            val changedMetaDataUri = metadata?.getString(MediaMetadataCompat.METADATA_KEY_MEDIA_URI)
+            Log.d(TAG, "onMetadataChanged: $changedMetaDataUri")
+            if (changedMetaDataUri != null) {
+                val sharedPref = this@MainActivity.getSharedPreferences(
+                    getString(R.string.preference_file_key), Context.MODE_PRIVATE
+                )
+                val nowPlayingMediaImage = sharedPref.getString("NowPlayingMediaImage", "")
 
-            val sharedPref = this@MainActivity.getSharedPreferences(
-                getString(R.string.preference_file_key), Context.MODE_PRIVATE
-            )
-            val nowPlayingMediaImage = sharedPref.getString("NowPlayingMediaImage", "")
+                Glide.with(binding.bottomPlayImage).load(nowPlayingMediaImage)
+                    .into(binding.bottomPlayImage)
 
-            Glide.with(binding.bottomPlayImage).load(nowPlayingMediaImage).into(binding.bottomPlayImage)
+                mainViewModel.playingDataIsChanged()
 
-
-            Log.d(TAG, "onMetadataChanged: ${mainViewModel.currentPlayingPosition.replayCache}")
-
-            CoroutineScope(Dispatchers.IO).launch {
-                val a = getPaletteColor(nowPlayingMediaImage)
-                Log.d(TAG, "onMetadataChanged: $a")
-                mainViewModel.paletteColor(a)
+                CoroutineScope(Dispatchers.IO).launch {
+                    val a = getPaletteColor(nowPlayingMediaImage)
+                    mainViewModel.paletteColor(a)
+                }
             }
-
-
         }
 
         override fun onPlaybackStateChanged(state: PlaybackStateCompat?) {
@@ -366,7 +363,6 @@ class MainActivity : AppCompatActivity() {
         }
 
 
-
     }
 
     override fun onPause() {
@@ -431,11 +427,9 @@ class MainActivity : AppCompatActivity() {
 
     private suspend fun getPaletteColor(uri: String?) = suspendCancellableCoroutine<PaletteColor> {
         try {
-            val bitmap =
-                URL(uri).openStream().use { stream ->
-                    BitmapFactory.decodeStream(stream)
-                }
-            Palette.from(bitmap).generate { palette ->
+            val theBitmap = Glide.
+            with(this).asBitmap().load(uri).submit().get()
+            Palette.from(theBitmap).generate { palette ->
                 val colorPalette = PaletteColor(
                     vibrant = palette!!.getVibrantColor(0x000000),
                     vibrantLight = palette.getLightVibrantColor(0x000000),
