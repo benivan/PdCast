@@ -1,6 +1,5 @@
 package com.example.pdcast.data.dao
 
-import androidx.lifecycle.LiveData
 import androidx.paging.PagingSource
 import androidx.room.*
 import com.example.pdcast.data.dto.DBPodcastsEpisodes
@@ -17,21 +16,30 @@ interface RssFeedPodcastDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertEpisodes(episode: List<DBPodcastsEpisodes>)
 
-    @Query("SELECT * FROM podcast_table ORDER BY podcastId ASC")
-    fun getAllPodcasts(): Flow<List<DBRssFeedPodcast>>
+
+    @Query("SELECT * FROM podcast_table WHERE isSubscribe =:isSubscribed ORDER BY podcastId ASC")
+    fun getAllPodcasts(isSubscribed: Boolean): Flow<List<DBRssFeedPodcast>>
 
     @Transaction
     @Query("SELECT * FROM podcast_table WHERE podcastId =:podcastId")
-     fun getEpisodeWithPodcast(podcastId: Long): Flow<PodcastsWithEpisodes>
+    fun getEpisodeWithPodcast(podcastId: Long): Flow<PodcastsWithEpisodes>
 
     @Transaction
     @Query("SELECT * FROM podcasts_episodes_table WHERE podcastId =:podcastId")
-    fun pagingSourceEpisodesWithPodcastId(podcastId: Long): PagingSource<Int,DBPodcastsEpisodes>
+    fun pagingSourceEpisodesWithPodcastId(podcastId: Long): PagingSource<Int, DBPodcastsEpisodes>
 
     @Transaction
     @Query("SELECT * FROM podcast_table WHERE title=:podcastTitle")
     fun getEpisodeWithPodcast(podcastTitle: String): Flow<PodcastsWithEpisodes>
 
     @Query("SELECT podcastId from podcast_table Where podcastFeedUrl=:feedLink")
-    fun getPodcastIdWithFeedUrl(feedLink: String): Long?
+    suspend fun getPodcastIdWithFeedUrl(feedLink: String): Long?
+
+    @Query("SELECT * FROM podcast_table WHERE podcastFeedUrl =:feedLink")
+    suspend fun getPodcastWithFeedUrl(feedLink: String):DBRssFeedPodcast
+
+    @Update(entity = DBRssFeedPodcast::class)
+    suspend fun updateSubscribePodCast(podcast: DBRssFeedPodcast)
+
+
 }
