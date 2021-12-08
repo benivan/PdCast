@@ -37,6 +37,9 @@ class MainViewModel(
     private val _currentPlayingPosition = MutableSharedFlow<Long>(1)
     var currentPlayingPosition = _currentPlayingPosition.asSharedFlow()
 
+    private val _nowPlayingMetaChanged = MutableStateFlow<Boolean>(false)
+    var nowPlayingDataIsCHanged = _nowPlayingMetaChanged.asStateFlow()
+
     private val _paletteColor = MutableSharedFlow<PaletteColor>(1)
     var paletteColor = _paletteColor.asSharedFlow()
 
@@ -51,13 +54,14 @@ class MainViewModel(
 
     val playFromUri = _playFromUri.asSharedFlow()
 
+
     fun setController(controllerCompat: MediaControllerCompat) {
         controller = controllerCompat
         viewModelScope.launch {
-            controllerCompat.playbackState.position.let {
-                if(it > 999L){
-                    val isGoodTimeToEmit = isPlaying.replayCache[0]
-                    if (isGoodTimeToEmit) {
+            val isGoodTimeToEmit = isPlaying.replayCache[0]
+            if (isGoodTimeToEmit) {
+                controllerCompat.playbackState.position.let {
+                    if (it > 999L) {
                         Log.d(TAG, "setController: $it")
                         _currentPlayingPosition.emit(it)
                     }
@@ -66,14 +70,23 @@ class MainViewModel(
             delay(1000)
             setController(controllerCompat)
         }
+
     }
+
+    fun playingDataIsChanged(){
+        viewModelScope.launch {
+            _nowPlayingMetaChanged.emit(true)
+        }
+
+    }
+
 
     fun getController(): MediaControllerCompat? {
 
         return controller
     }
 
-    fun paletteColor(paletteColor: PaletteColor){
+    fun paletteColor(paletteColor: PaletteColor) {
         viewModelScope.launch {
             _paletteColor.emit(paletteColor)
         }
@@ -99,6 +112,13 @@ class MainViewModel(
             val podcastId = rssFeedPodcastRepository.addPodcast(podcast)
             callback(podcastId)
         }
+    }
+
+    suspend fun addPodcastToSubscribe(feedUrl:String){
+        rssFeedPodcastRepository.addPodcastToSubscribed(feedUrl)
+    }
+    suspend fun removePodcastFromSubscribeTable(feedUrl: String){
+        rssFeedPodcastRepository.removePodcastToSubscribe(feedUrl)
     }
 
     fun addPodcastsEpisodes(podcastId: Long, episodes: List<RssFeedResponse.EpisodeResponse>) {
