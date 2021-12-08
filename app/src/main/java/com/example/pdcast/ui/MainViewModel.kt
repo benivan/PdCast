@@ -15,10 +15,7 @@ import com.example.pdcast.util.PaletteColor
 import com.example.pdcast.util.Resource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 
@@ -59,15 +56,16 @@ class MainViewModel(
         viewModelScope.launch {
             controllerCompat.playbackState.position.let {
                 if(it > 999L){
-                    Log.d(TAG, "setController: $it")
-                    _currentPlayingPosition.emit(it)
+                    val isGoodTimeToEmit = isPlaying.replayCache[0]
+                    if (isGoodTimeToEmit) {
+                        Log.d(TAG, "setController: $it")
+                        _currentPlayingPosition.emit(it)
+                    }
                 }
             }
-
             delay(1000)
             setController(controllerCompat)
         }
-
     }
 
     fun getController(): MediaControllerCompat? {
