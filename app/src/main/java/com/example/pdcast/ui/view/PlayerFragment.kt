@@ -1,6 +1,8 @@
 package com.example.pdcast.ui.view
 
 import android.content.Context
+import android.graphics.ColorFilter
+import android.graphics.PorterDuffColorFilter
 import android.os.Build
 import android.os.Bundle
 import android.support.v4.media.session.MediaControllerCompat
@@ -12,9 +14,11 @@ import android.view.ViewGroup
 import android.widget.SeekBar
 import androidx.annotation.RequiresApi
 import androidx.core.graphics.drawable.toDrawable
+import androidx.core.graphics.toColor
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
 import com.example.pdcast.R
@@ -22,6 +26,7 @@ import com.example.pdcast.databinding.FragmentPlayerBinding
 import com.example.pdcast.ui.MainViewModel
 import com.example.pdcast.ui.PlayerViewModel
 import com.google.android.material.transition.MaterialFadeThrough
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 
@@ -97,9 +102,11 @@ class PlayerFragment : Fragment() {
                     mainViewModel.getController()?.transportControls?.play()
                 }
             }
+
+
         }
 
-        mainViewModel.paletteColor.onEach {
+        mainViewModel.paletteColor.flowWithLifecycle(lifecycle).onEach {
             val vibrant = it.vibrant.toDrawable()
             val vibrantLight = it.vibrantLight.toDrawable()
             val vibrantDark = it.vibrantDark.toDrawable()
@@ -124,14 +131,16 @@ class PlayerFragment : Fragment() {
                 binding.playerSeekBar.secondaryProgress = it
             }.launchIn(lifecycleScope)
 
+
         mainViewModel.currentPlayingPosition
             .onEach {
-
                 binding.playerSeekBar.progress = it.toInt()
                 binding.startDuration.text =
                     convertSecondIntoDuration((it / 1000).toInt())
 
             }.launchIn(lifecycleScope)
+
+
 
         binding.playerSeekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
@@ -236,14 +245,3 @@ class PlayerFragment : Fragment() {
 
 
 }
-
-
-
-
-
-
-
-
-
-
-
