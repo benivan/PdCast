@@ -228,6 +228,7 @@ class MediaPlaybackService : MediaBrowserServiceCompat(), PdCastMediaCallback.Po
                     URL(it.toString()).openStream().use { stream ->
                         BitmapFactory.decodeStream(stream)
                     }
+//                val bitmap = Glide.with(this@MediaPlaybackService).asBitmap().load(mediaDescription.iconUri).submit().get()
 
                 }
                 bitmap?.let { setBitMapToMemoryCache(mediaDescription.iconUri.toString(), bitmap) }
