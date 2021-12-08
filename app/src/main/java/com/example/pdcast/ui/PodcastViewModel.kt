@@ -43,6 +43,7 @@ class PodcastViewModel() : ViewModel() {
                         RssFeedResponse(
                             title = podcast.podcast.title,
                             description = podcast.podcast.description,
+                            isSubscribed = podcast.podcast.isSubscribe,
                             language = podcast.podcast.language,
                             link = podcast.podcast.link,
                             imageUrl = podcast.podcast.imageUrl,
