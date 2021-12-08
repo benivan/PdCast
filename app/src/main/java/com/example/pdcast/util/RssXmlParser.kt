@@ -90,7 +90,7 @@ class RssXmlParser {
             }
         }
         podcastName = title
-        return RssFeedResponse(title, description, language, link, imageUrl, episodes)
+        return RssFeedResponse(false,title, description, language, link, imageUrl, episodes)
     }
 
     @Throws(IOException::class, XmlPullParserException::class)
