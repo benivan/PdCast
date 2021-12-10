@@ -3,7 +3,13 @@
 
     <style name="ImageStyle">
         <item name="cornerSize">
-            10%
+            5%
+        </item>
+    </style>
+
+    <style name="homeSmallImageStyle">
+        <item name="cornerRadius">
+            5dp
         </item>
     </style>
 
