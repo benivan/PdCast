@@ -75,7 +75,7 @@ class HomeScreenFragment : Fragment() {
 
             val orientation = this.resources.configuration.orientation;
             if (orientation == Configuration.ORIENTATION_PORTRAIT) {
-                val layoutManager = GridLayoutManager(requireContext(), 2)
+                val layoutManager = GridLayoutManager(requireContext(), 3)
                 binding.homeFragmentRecyclerView.layoutManager = layoutManager
                 binding.homeFragmentRecyclerView.adapter = adapter
             } else {
