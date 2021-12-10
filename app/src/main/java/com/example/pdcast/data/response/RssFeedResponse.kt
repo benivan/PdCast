@@ -3,6 +3,7 @@ package com.example.pdcast.data.response
 import java.util.*
 
 data class RssFeedResponse(
+    var isSubscribed:Boolean? = null,
     var title: String? = null,
     var description: String? = null,
     var language:String? = null,
