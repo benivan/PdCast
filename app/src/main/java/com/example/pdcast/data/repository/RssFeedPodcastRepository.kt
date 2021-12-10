@@ -1,7 +1,6 @@
 package com.example.pdcast.data.repository
 
 import android.util.Log
-import androidx.lifecycle.LiveData
 import com.example.pdcast.data.api.RssFeedService
 import com.example.pdcast.data.dao.RssFeedPodcastDao
 import com.example.pdcast.data.dto.DBPodcastsEpisodes
@@ -11,9 +10,6 @@ import com.example.pdcast.data.response.RssFeedResponse
 import com.example.pdcast.util.RssXmlParser
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.withContext
 
 class RssFeedPodcastRepository(
@@ -23,9 +19,9 @@ class RssFeedPodcastRepository(
 
     private val rssXmlParser = RssXmlParser()
     val readAllPodcast: Flow<List<DBRssFeedPodcast>> =
-        rssFeedPodcastDao.getAllPodcasts()
+        rssFeedPodcastDao.getAllPodcasts(true)
 
-    suspend fun getPodcastFromFeed(feedLink: String): Flow<PodcastsWithEpisodes>{
+    suspend fun getPodcastFromFeed(feedLink: String): Flow<PodcastsWithEpisodes> {
         return withContext(Dispatchers.IO) {
             val podcastId = try {
                 getPodcastIdWithFeedUrl(feedLink)!!
@@ -71,6 +67,7 @@ class RssFeedPodcastRepository(
             DBRssFeedPodcast(
                 title = data.title.toString(),
                 podcastFeedUrl = feedLink,
+                isSubscribe = false,
                 description = data.description.toString(),
                 language = data.language.toString(),
                 link = data.link.toString(),
@@ -83,12 +80,12 @@ class RssFeedPodcastRepository(
 //        return rssFeedPodcastDao.getEpisodeWithPodcast(podcastTitle)
 //    }
 
-    private suspend fun readPodcastsWithEpisodes(id: Long): Flow<PodcastsWithEpisodes>{
+    private suspend fun readPodcastsWithEpisodes(id: Long): Flow<PodcastsWithEpisodes> {
         Log.d(TAG, "readPodcastsWithEpisodes: ")
         return rssFeedPodcastDao.getEpisodeWithPodcast(id)
     }
 
-    private  fun getPodcastIdWithFeedUrl(feedUrl: String): Long? {
+    private suspend fun getPodcastIdWithFeedUrl(feedUrl: String): Long? {
         return rssFeedPodcastDao.getPodcastIdWithFeedUrl(feedUrl)
     }
 
@@ -98,6 +95,39 @@ class RssFeedPodcastRepository(
 
     suspend fun addPodcastEpisode(episodes: List<DBPodcastsEpisodes>) {
         rssFeedPodcastDao.insertEpisodes(episodes)
+    }
+
+    suspend fun removePodcastToSubscribe(feedLink: String){
+        val podcast = rssFeedPodcastDao.getPodcastWithFeedUrl(feedLink)
+
+        rssFeedPodcastDao.updateSubscribePodCast(
+            DBRssFeedPodcast(
+                podcastId = podcast.podcastId,
+                isSubscribe = false,
+                podcastFeedUrl = podcast.podcastFeedUrl,
+                title = podcast.title,
+                description = podcast.description,
+                language = podcast.language,
+                link = podcast.link,
+                imageUrl = podcast.imageUrl
+            )
+        )
+    }
+    suspend fun addPodcastToSubscribed(feedLink: String) {
+        val podcast = rssFeedPodcastDao.getPodcastWithFeedUrl(feedLink)
+
+        rssFeedPodcastDao.updateSubscribePodCast(
+            DBRssFeedPodcast(
+                podcastId = podcast.podcastId,
+                isSubscribe = true,
+                podcastFeedUrl = podcast.podcastFeedUrl,
+                title = podcast.title,
+                description = podcast.description,
+                language = podcast.language,
+                link = podcast.link,
+                imageUrl = podcast.imageUrl
+            )
+        )
     }
 
     companion object {
