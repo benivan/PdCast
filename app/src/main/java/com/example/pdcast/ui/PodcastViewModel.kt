@@ -10,6 +10,7 @@ import com.example.pdcast.data.model.PodcastEpisodeModel
 import com.example.pdcast.data.model.PodcastModel
 import com.example.pdcast.data.repository.RssFeedPodcastRepository
 import com.example.pdcast.data.response.RssFeedResponse
+import com.example.pdcast.util.PaletteColor
 import com.example.pdcast.util.Resource
 import com.example.pdcast.util.RssXmlParser
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -25,6 +26,9 @@ class PodcastViewModel() : ViewModel() {
 
     private val _podcast = MutableSharedFlow<Resource<RssFeedResponse>>(1)
     val podcast: SharedFlow<Resource<RssFeedResponse>> = _podcast
+
+    private val _paletteColor = MutableSharedFlow<PaletteColor>(1)
+    val paletteColor:SharedFlow<PaletteColor> = _paletteColor
 
     fun setRssFeedPodcastRepository(
         rssFeedPodcastRepository: RssFeedPodcastRepository,
@@ -68,6 +72,13 @@ class PodcastViewModel() : ViewModel() {
                 _podcast.emit(Resource.Failure(e))
             }
 
+        }
+    }
+
+
+    fun paletteColor(paletteColor: PaletteColor){
+        viewModelScope.launch {
+            _paletteColor.emit(paletteColor)
         }
     }
 
