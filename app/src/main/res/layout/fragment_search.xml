@@ -16,7 +16,7 @@
             android:layout_height="wrap_content"
             android:id="@+id/guideline"
             android:orientation="horizontal"
-            app:layout_constraintGuide_begin="40dp"
+            app:layout_constraintGuide_begin="20dp"
             />
 
         <TextView
@@ -59,7 +59,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:layout_marginTop="16dp"
             android:text="Search"
             android:textColor="@color/black"
             android:textSize="30sp"
