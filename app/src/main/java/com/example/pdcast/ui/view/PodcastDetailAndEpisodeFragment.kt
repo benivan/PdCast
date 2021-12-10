@@ -11,26 +11,28 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.graphics.drawable.toDrawable
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
-import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.example.pdcast.data.dto.DBPodcastsEpisodes
-import com.example.pdcast.data.dto.DBRssFeedPodcast
 import com.example.pdcast.data.response.RssFeedResponse
 import com.example.pdcast.databinding.FragmentPodcastDetailAndEpisodeBinding
 import com.example.pdcast.ui.MainViewModel
 import com.example.pdcast.ui.PodcastViewModel
-import com.example.pdcast.util.Resource
+import com.example.pdcast.util.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import javax.annotation.meta.When
+import kotlinx.coroutines.launch
+import javax.annotation.Untainted
 
 
 class PodcastDetailAndEpisodeFragment : Fragment() {
@@ -48,10 +50,12 @@ class PodcastDetailAndEpisodeFragment : Fragment() {
     private lateinit var episodeAdapter: EpisodeItemAdapter
 
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        viewModel.setRssFeedPodcastRepository(mainViewModel.getRssFeedPodcastRepository(),args.feedLink)
+        viewModel.setRssFeedPodcastRepository(
+            mainViewModel.getRssFeedPodcastRepository(),
+            args.feedLink
+        )
     }
 
 
@@ -72,28 +76,30 @@ class PodcastDetailAndEpisodeFragment : Fragment() {
         binding.podcastSubscribeButton.visibility = View.GONE
 
 
-        episodeAdapter = EpisodeItemAdapter(emptyList(), object : EpisodeListener {
-            override fun onEpisodeClicked(episodeViewData: RssFeedResponse.EpisodeResponse) {
-                val controller =
-                    MediaControllerCompat.getMediaController(requireActivity())
+        episodeAdapter = EpisodeItemAdapter(
+            emptyList(),
+            object : EpisodeListener {
+                override fun onEpisodeClicked(episodeViewData: RssFeedResponse.EpisodeResponse) {
+                    val controller =
+                        MediaControllerCompat.getMediaController(requireActivity())
 
-                val activity = requireActivity()
-                if (controller.playbackState != null) {
-                    if (controller.playbackState.state ==
-                        PlaybackStateCompat.STATE_PLAYING
-                    ) {
+                    val activity = requireActivity()
+                    if (controller.playbackState != null) {
+                        if (controller.playbackState.state ==
+                            PlaybackStateCompat.STATE_PLAYING
+                        ) {
 //                      controller.transportControls.pause()
-                        startPlaying(episodeViewData, activity)
-                    } else if (controller.playbackState.state == PlaybackStateCompat.STATE_PAUSED) {
+                            startPlaying(episodeViewData, activity)
+                        } else if (controller.playbackState.state == PlaybackStateCompat.STATE_PAUSED) {
+                            startPlaying(episodeViewData, activity)
+                        }
+                    } else {
                         startPlaying(episodeViewData, activity)
                     }
-                } else {
-                    startPlaying(episodeViewData, activity)
                 }
-            }
-        },
+            },
 
-        )
+            )
         binding.rvEpisode.adapter = episodeAdapter
 
 
@@ -115,24 +121,26 @@ class PodcastDetailAndEpisodeFragment : Fragment() {
                     binding.podcastSubscribeButton.visibility = View.GONE
                 }
                 is Resource.Success -> {
-                    Log.d(TAG, "onViewCreated: ${it}")
                     binding.progressBarEpisodePage.visibility = View.GONE
                     binding.errorTextView.visibility = View.GONE
                     binding.tvDescription.visibility = View.GONE
                     binding.podcastSubscribeButton.visibility = View.VISIBLE
+                    setSubscribeListener(it.data.isSubscribed!!)
                     binding.tvDescription.text = it.data.description
                     binding.tvLanguage.text = it.data.language
                     binding.tvTitle.text = it.data.title
+                    if (it.data.isSubscribed == true) {
+                        binding.podcastSubscribeButton.text = "UnSubscribe"
+                    } else binding.podcastSubscribeButton.text = "Subscribe"
                     Glide.with(binding.imageView).load(it.data.imageUrl).into(binding.imageView)
-//                    setSubscribeListener(it.data)
-                    val sizeOfPodcastEpisode = it.data.episodes.size
-                    if (sizeOfPodcastEpisode <= 5){
-                        episodeAdapter.submitList(it.data.episodes.filterIndexed{
-                            index, episodeResponse ->  index<=sizeOfPodcastEpisode
-                        })
-                    }else{
-                        episodeAdapter.submitList(it.data.episodes)
+
+                    episodeAdapter.submitList(it.data.episodes)
+
+                    CoroutineScope(Dispatchers.IO).launch {
+                        viewModel.paletteColor(getPaletteColor(it.data.imageUrl, requireContext()))
                     }
+
+
 
 
                 }
@@ -142,18 +150,28 @@ class PodcastDetailAndEpisodeFragment : Fragment() {
         }.launchIn(lifecycleScope)
 
 
+        viewModel.paletteColor.flowWithLifecycle(lifecycle).onEach {
+            val vibrantColor = getVibrantColorFromPalette(it)
+            val mutedColor = getMutedColorFromPalette(it)
+            val darkerColor = getDarkerColorFromPalette(it)
+            binding.topSpace.background = darkerColor.toDrawable()
+        }.launchIn(lifecycleScope)
+
+
     }
 
 
+    private fun setSubscribeListener(isSubscribed: Boolean) {
+        binding.podcastSubscribeButton.setOnClickListener {
+            viewLifecycleOwner.lifecycleScope.launch {
+                if (!isSubscribed) {
+                    mainViewModel.addPodcastToSubscribe(args.feedLink)
+                } else mainViewModel.removePodcastFromSubscribeTable(args.feedLink)
 
+            }
 
-//    private fun setSubscribeListener(data: RssFeedResponse) {
-//        binding.podcastSubscribeButton.setOnClickListener {
-//            mainViewModel.addRssPodcast(data) {
-//                mainViewModel.addPodcastsEpisodes(it, data.episodes)
-//            }
-//        }
-//    }
+        }
+    }
 
 
     fun startPlaying(
@@ -203,7 +221,7 @@ class PodcastDetailAndEpisodeFragment : Fragment() {
         episodeViewData.duration?.let { removeColon(it) }?.let {
             bundle.putLong(
                 MediaMetadata.METADATA_KEY_DURATION,
-                it*1000L
+                it * 1000L
             )
         }
 
