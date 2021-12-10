@@ -1,7 +1,9 @@
 package com.example.pdcast
 
 import android.content.*
-import android.graphics.BitmapFactory
+import android.graphics.Color
+import android.graphics.PorterDuff
+import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaMetadataCompat
@@ -36,13 +38,14 @@ import com.example.pdcast.ui.MainViewModel
 import com.example.pdcast.ui.MainViewModelFactory
 import com.example.pdcast.util.PState
 import com.example.pdcast.util.PaletteColor
+import com.example.pdcast.util.getPaletteColor
+import com.example.pdcast.util.getVibrantColorFromPalette
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
-import java.net.URL
 import kotlin.coroutines.resumeWithException
 
 
@@ -112,12 +115,6 @@ class MainActivity : AppCompatActivity() {
                 }
             }.launchIn(lifecycleScope)
 
-        //Palette Color from mainViewModel
-        mainViewModel.paletteColor.flowWithLifecycle(lifecycle).onEach {
-            val color = it.vibrant.toDrawable()
-            color.alpha = 225 / 6
-            binding.bottomPlayerLayout.background = color
-        }.launchIn(lifecycleScope)
 
         val sharedPref = this@MainActivity.getSharedPreferences(
             getString(R.string.preference_file_key), Context.MODE_PRIVATE
@@ -126,7 +123,7 @@ class MainActivity : AppCompatActivity() {
         if (previouslyPlayedData()) {
             CoroutineScope(Dispatchers.IO).launch {
                 Log.d(TAG, "onCreate: $nowPlayingMediaImage")
-                val a = getPaletteColor(nowPlayingMediaImage)
+                val a = getPaletteColor(nowPlayingMediaImage,this@MainActivity)
                 Log.d(TAG, "onMetadataChanged: $a")
                 mainViewModel.paletteColor(a)
             }
@@ -135,7 +132,19 @@ class MainActivity : AppCompatActivity() {
 
         setListeners()
         binding.bottomPlayerLayout.isVisible = previouslyPlayedData()
+        binding.playPauseButton.drawable.mutate().setColorFilter(Color.WHITE,PorterDuff.Mode.MULTIPLY)
 
+        //Palette Color from mainViewModel
+        mainViewModel.paletteColor.flowWithLifecycle(lifecycle).onEach {
+            val vibrantColor = getVibrantColorFromPalette(it)
+            Log.d(TAG, "onCreate: ${it}")
+            Log.d(TAG, "onCreate COLOR: ${vibrantColor}")
+            val color = vibrantColor.toDrawable()
+            color.alpha = 225 / 8
+            binding.bottomPlayerLayout.background = color
+            val playPauseGradientDrawable = binding.playPauseButton.background.mutate() as GradientDrawable
+            playPauseGradientDrawable.setColor(vibrantColor)
+        }.launchIn(lifecycleScope)
     }
 
     private fun setListeners() {
@@ -143,6 +152,7 @@ class MainActivity : AppCompatActivity() {
             if (controller.playbackState != null) {
                 if (controller.playbackState.state == PlaybackStateCompat.STATE_PLAYING) {
                     controller.transportControls.pause()
+
                 }
                 if (controller.playbackState.state == PlaybackStateCompat.STATE_PAUSED) {
                     controller.transportControls.play()
@@ -263,6 +273,7 @@ class MainActivity : AppCompatActivity() {
             super.onMetadataChanged(metadata)
             val changedMetaDataUri = metadata?.getString(MediaMetadataCompat.METADATA_KEY_MEDIA_URI)
             Log.d(TAG, "onMetadataChanged: $changedMetaDataUri")
+
             if (changedMetaDataUri != null) {
                 val sharedPref = this@MainActivity.getSharedPreferences(
                     getString(R.string.preference_file_key), Context.MODE_PRIVATE
@@ -271,11 +282,11 @@ class MainActivity : AppCompatActivity() {
 
                 Glide.with(binding.bottomPlayImage).load(nowPlayingMediaImage)
                     .into(binding.bottomPlayImage)
-
+                Log.d(TAG, "onMetadataChanged: $nowPlayingMediaImage")
                 mainViewModel.playingDataIsChanged()
 
                 CoroutineScope(Dispatchers.IO).launch {
-                    val a = getPaletteColor(nowPlayingMediaImage)
+                    val a = getPaletteColor(nowPlayingMediaImage,this@MainActivity)
                     mainViewModel.paletteColor(a)
                 }
             }
@@ -285,6 +296,7 @@ class MainActivity : AppCompatActivity() {
             super.onPlaybackStateChanged(state)
             if (state?.state == PlaybackStateCompat.STATE_PAUSED) {
                 binding.playPauseButton.setImageResource(R.drawable.play_arrow)
+//                mainViewModel.setPlaying(false)
             }
             if (state?.state == PlaybackStateCompat.STATE_PLAYING) {
                 binding.playPauseButton.setImageResource(R.drawable.pause)
@@ -300,6 +312,7 @@ class MainActivity : AppCompatActivity() {
             controller = MediaControllerCompat.getMediaController(this@MainActivity)
 
             if (controller.playbackState != null) {
+                mainViewModel.setPlaying(true)
                 mainViewModel.setController(controller)
                 if (controller.playbackState.state == PlaybackStateCompat.STATE_PAUSED) {
                     binding.playPauseButton.setImageResource(R.drawable.play_arrow)
@@ -361,8 +374,6 @@ class MainActivity : AppCompatActivity() {
         } else {
             mediaBrowser.connect()
         }
-
-
     }
 
     override fun onPause() {
@@ -425,29 +436,7 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    private suspend fun getPaletteColor(uri: String?) = suspendCancellableCoroutine<PaletteColor> {
-        try {
-            val theBitmap = Glide.
-            with(this).asBitmap().load(uri).submit().get()
-            Palette.from(theBitmap).generate { palette ->
-                val colorPalette = PaletteColor(
-                    vibrant = palette!!.getVibrantColor(0x000000),
-                    vibrantLight = palette.getLightVibrantColor(0x000000),
-                    vibrantDark = palette.getDarkVibrantColor(0x000000),
-                    muted = palette.getMutedColor(0x000000),
-                    mutedLight = palette.getLightMutedColor(0x000000),
-                    mutedDark = palette.getDarkMutedColor(0x000000)
-                )
-                it.resumeWith(Result.success(colorPalette))
-            }
 
-
-        } catch (e: Exception) {
-            it.resumeWithException(e)
-        }
-
-
-    }
 
 
     companion object {
