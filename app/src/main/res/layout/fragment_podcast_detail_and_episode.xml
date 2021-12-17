@@ -138,6 +138,21 @@
                 android:background="@drawable/custom_subscribe_button"
                 android:foreground="@drawable/custom_subscribe_button_foreground"
                 app:layout_constraintTop_toTopOf="@id/guideline" />
+            <Button
+                android:id="@+id/podcastUnSubscribeButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                android:text="UnSubscribe"
+                android:textSize="14sp"
+                android:clickable="true"
+                android:hapticFeedbackEnabled="true"
+                app:layout_constraintBottom_toBottomOf="@id/guideline"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintLeft_toRightOf="@id/imageView"
+                android:background="@drawable/custom_subscribe_button"
+                android:foreground="@drawable/custom_subscribe_button_foreground"
+                app:layout_constraintTop_toTopOf="@id/guideline" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
 </FrameLayout>
