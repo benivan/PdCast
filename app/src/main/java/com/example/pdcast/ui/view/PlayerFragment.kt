@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.ColorFilter
+import android.graphics.DrawFilter
 import android.graphics.PorterDuffColorFilter
 import android.graphics.drawable.GradientDrawable
 import android.os.Build
@@ -29,9 +30,7 @@ import com.example.pdcast.R
 import com.example.pdcast.databinding.FragmentPlayerBinding
 import com.example.pdcast.ui.MainViewModel
 import com.example.pdcast.ui.PlayerViewModel
-import com.example.pdcast.util.getDarkerColorFromPalette
-import com.example.pdcast.util.getMutedColorFromPalette
-import com.example.pdcast.util.getVibrantColorFromPalette
+import com.example.pdcast.util.*
 import com.google.android.material.transition.MaterialFadeThrough
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.launchIn
@@ -118,27 +117,13 @@ class PlayerFragment : Fragment() {
             val mutedColor = getMutedColorFromPalette(it)
             val darkColor = getDarkerColorFromPalette(it)
             Log.d(TAG, "onViewCreated vibrantColor : $vibrantColor")
-            val vibrant = it.vibrant.toDrawable()
-            val vibrantLight = it.vibrantLight.toDrawable()
-            val vibrantDark = it.vibrantDark.toDrawable()
-            val muted = it.muted.toDrawable()
-            val mutedLight = it.mutedLight.toDrawable()
-            val mutedDark = it.mutedDark.toDrawable()
-
-
-            binding.vibrant.background = vibrant
-            binding.vibrantLight.background = vibrantLight
-            binding.vibrantDark.background =vibrantDark
-            binding.muted.background = muted
-            binding.mutedLight.background = mutedLight
-            binding.mutedDark.background = mutedDark
 
             val gradientDrawable = binding.playerPlayPauseButton.background.mutate() as GradientDrawable
-            gradientDrawable.setColor(vibrantColor)
+            gradientDrawable.setColor(Color.WHITE)
+            binding.playerSeekBar.progressTintList = ColorStateList.valueOf(vibrantColor)
+            binding.playerSeekBar.secondaryProgressTintList = ColorStateList.valueOf(
+                getTransparentColor(vibrantColor,4))
             binding.root.background = mutedColor.toDrawable()
-//            binding.playerConstraintLayout.background = vibrantColor.toDrawable()
-//            binding.playerSeekBar.horizontalScrollbarThumbDrawable = it.mutedDark.toDrawable()
-////            binding.playerSeekBar.progressDrawable = it.mutedDark.toDrawable()
         }.launchIn(lifecycleScope)
 
         mainViewModel.isPlaying
@@ -149,6 +134,7 @@ class PlayerFragment : Fragment() {
 
         mainViewModel.bufferLevel
             .onEach {
+                Log.d(TAG, "onViewCreated: BufferLevel $it")
                 binding.playerSeekBar.secondaryProgress = it
             }.launchIn(lifecycleScope)
 
