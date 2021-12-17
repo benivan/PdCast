@@ -1,8 +1,11 @@
 package com.example.pdcast.ui.view
 
 import android.content.Context
+import android.graphics.BlendMode
+import android.graphics.BlendModeColorFilter
 import android.media.MediaMetadata
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaControllerCompat
@@ -11,12 +14,13 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.RequiresApi
 import androidx.core.graphics.drawable.toDrawable
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
@@ -32,7 +36,6 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import javax.annotation.Untainted
 
 
 class PodcastDetailAndEpisodeFragment : Fragment() {
@@ -68,8 +71,11 @@ class PodcastDetailAndEpisodeFragment : Fragment() {
         return binding.root
     }
 
+    @RequiresApi(Build.VERSION_CODES.Q)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        Log.d(TAG, "onViewCreated: ")
 
         binding.progressBarEpisodePage.visibility = View.GONE
         binding.errorTextView.visibility = View.GONE
@@ -103,7 +109,18 @@ class PodcastDetailAndEpisodeFragment : Fragment() {
         binding.rvEpisode.adapter = episodeAdapter
 
 
+        viewModel.paletteColor.flowWithLifecycle(lifecycle).onEach {
+            val vibrantColor = getVibrantColorFromPalette(it)
+            val mutedColor = getMutedColorFromPalette(it)
+            val darkerColor = getDarkerColorFromPalette(it)
+            binding.topSpace.background = darkerColor.toDrawable()
+            binding.podcastUnSubscribeButton.background.colorFilter =
+                BlendModeColorFilter(vibrantColor, BlendMode.COLOR)
+            binding.podcastSubscribeButton.background.colorFilter =
+                BlendModeColorFilter(vibrantColor, BlendMode.COLOR)
 
+            episodeAdapter.setPalateColor(it)
+        }.launchIn(lifecycleScope)
 
         viewModel.podcast.flowWithLifecycle(lifecycle).onEach {
             when (it) {
@@ -125,7 +142,9 @@ class PodcastDetailAndEpisodeFragment : Fragment() {
                     binding.errorTextView.visibility = View.GONE
                     binding.tvDescription.visibility = View.GONE
                     binding.podcastSubscribeButton.visibility = View.VISIBLE
-                    setSubscribeListener(it.data.isSubscribed!!)
+                    setSubscribeListener()
+                    binding.podcastSubscribeButton.isVisible = it.data.isSubscribed == false
+                    binding.podcastUnSubscribeButton.isVisible = it.data.isSubscribed == true
                     binding.tvDescription.text = it.data.description
                     binding.tvLanguage.text = it.data.language
                     binding.tvTitle.text = it.data.title
@@ -141,8 +160,6 @@ class PodcastDetailAndEpisodeFragment : Fragment() {
                     }
 
 
-
-
                 }
             }
         }.catch { e ->
@@ -150,27 +167,26 @@ class PodcastDetailAndEpisodeFragment : Fragment() {
         }.launchIn(lifecycleScope)
 
 
-        viewModel.paletteColor.flowWithLifecycle(lifecycle).onEach {
-            val vibrantColor = getVibrantColorFromPalette(it)
-            val mutedColor = getMutedColorFromPalette(it)
-            val darkerColor = getDarkerColorFromPalette(it)
-            binding.topSpace.background = darkerColor.toDrawable()
-        }.launchIn(lifecycleScope)
 
 
     }
 
 
-    private fun setSubscribeListener(isSubscribed: Boolean) {
+    private fun setSubscribeListener() {
         binding.podcastSubscribeButton.setOnClickListener {
             viewLifecycleOwner.lifecycleScope.launch {
-                if (!isSubscribed) {
-                    mainViewModel.addPodcastToSubscribe(args.feedLink)
-                } else mainViewModel.removePodcastFromSubscribeTable(args.feedLink)
+                mainViewModel.addPodcastToSubscribe(args.feedLink)
 
             }
 
         }
+        binding.podcastUnSubscribeButton.setOnClickListener {
+            viewLifecycleOwner.lifecycleScope.launch {
+
+                    mainViewModel.removePodcastFromSubscribeTable(args.feedLink)
+
+                }
+            }
     }
 
 
@@ -179,10 +195,21 @@ class PodcastDetailAndEpisodeFragment : Fragment() {
         fragmentActivity: FragmentActivity
     ) {
 //        val fragmentActivity = activity as FragmentActivity
+        val controller = MediaControllerCompat.getMediaController(fragmentActivity)
+        val bundle = Bundle()
+//        if (controller.metadata.description.mediaUri.toString() != episodeViewData.episodeUrl)  {
+//            mainViewModel.playingDataIsChanged()
+//        }
 
         val sharedPref = fragmentActivity.getSharedPreferences(
             "SharePreferencePdCast", Context.MODE_PRIVATE
         )
+        val nowPlayingPodcastMediaUrl = sharedPref.getString("NowPlayingMediaLink","")
+
+        if(nowPlayingPodcastMediaUrl != episodeViewData.episodeUrl){
+            mainViewModel.playingDataIsChanged()
+            Log.d(TAG, "startPlaying: MEDIA IS CHANGED!")
+        }
         with(sharedPref.edit()) {
             putBoolean("IsPlayedBefore", true)
             putString("NowPlayingMediaLink", episodeViewData.episodeUrl)
@@ -200,18 +227,18 @@ class PodcastDetailAndEpisodeFragment : Fragment() {
             } else duration.toLong()
         }
 
-        val controller = MediaControllerCompat.getMediaController(fragmentActivity)
 
-        val bundle = Bundle()
+
+
 
         bundle.putString(
             MediaMetadataCompat.METADATA_KEY_TITLE,
-            episodeViewData.podcastName
+            episodeViewData.title
         )
 
         bundle.putString(
             MediaMetadataCompat.METADATA_KEY_ARTIST,
-            episodeViewData.title
+            episodeViewData.podcastName
         )
         bundle.putString(
             MediaMetadataCompat.METADATA_KEY_ALBUM_ART_URI,
@@ -233,10 +260,21 @@ class PodcastDetailAndEpisodeFragment : Fragment() {
         Log.d(TAG, "startPlaying: This is called ${episodeViewData.episodeUrl} HERE WE GOOOO!!")
     }
 
+    @RequiresApi(Build.VERSION_CODES.Q)
+    override fun onResume() {
+        super.onResume()
+        viewModel.paletteColor.flowWithLifecycle(lifecycle).onEach {
+            val vibrantColor = getVibrantColorFromPalette(it)
+            binding.podcastSubscribeButton.background.colorFilter =
+                BlendModeColorFilter(vibrantColor, BlendMode.MULTIPLY)
+        }
+    }
+
 
     companion object {
         private const val TAG = "PodcastDetailAndEpisode"
     }
 
-
 }
+
+
