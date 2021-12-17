@@ -9,21 +9,21 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/playerConstraintLayout"
-        android:background="#80000000"
+        android:background="#000000"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
         <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/podcastImage"
             android:elevation="5dp"
-            android:layout_width="300dp"
-            android:layout_height="300dp"
+            android:layout_width="350dp"
+            android:layout_height="350dp"
             android:layout_marginTop="64dp"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             android:src="@drawable/ic_baseline_album"
-            app:shapeAppearance="@style/ImageStyle">
+            app:shapeAppearance="@style/FragmentPlayerImageStyle">
 
         </com.google.android.material.imageview.ShapeableImageView>
 
@@ -34,6 +34,8 @@
             android:layout_marginHorizontal="16dp"
             android:layout_marginTop="32dp"
             android:gravity="center"
+            android:maxLines="2"
+            android:ellipsize="end"
             android:text="TextView"
             android:textColor="@color/white"
             android:textSize="18sp"
@@ -43,15 +45,17 @@
 
         <TextView
             android:id="@+id/PodcastName"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="4dp"
             android:layout_marginTop="4dp"
             android:gravity="center"
+            android:maxLines="1"
+            android:ellipsize="end"
             android:text="TextView"
             android:textColor="@color/white"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintEnd_toEndOf="@+id/podcastEpisodeName"
+            app:layout_constraintStart_toStartOf="@+id/podcastEpisodeName"
             app:layout_constraintTop_toBottomOf="@+id/podcastEpisodeName" />
 
         <SeekBar
@@ -62,6 +66,9 @@
             android:layout_marginTop="16dp"
             android:padding="0dp"
             android:secondaryProgressTint="@color/purple_500"
+            android:thumbTint="@color/exo_white"
+            android:progressBackgroundTint="@color/grey"
+            android:progressTint="@color/teal_700"
             android:splitTrack="false"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
@@ -81,7 +88,8 @@
             app:layout_constraintBottom_toBottomOf="@+id/playerPlayPauseButton"
             app:layout_constraintEnd_toStartOf="@+id/playerPlayPauseButton"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/playerSeekBar" />
+            app:layout_constraintTop_toBottomOf="@id/playerSeekBar"
+            app:tint="@color/white" />
 
         <ImageButton
             android:id="@+id/playerPlayPauseButton"
@@ -92,7 +100,6 @@
             android:background="@drawable/play_button_background"
             android:clickable="true"
             android:foreground="@drawable/episode_play_button_foreground"
-            android:hapticFeedbackEnabled="true"
             android:src="@drawable/play_arrow_black"
             android:text="play"
             app:layout_constraintEnd_toStartOf="@+id/playerForButton"
@@ -112,7 +119,8 @@
             app:layout_constraintBottom_toBottomOf="@+id/playerPlayPauseButton"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/playerPlayPauseButton"
-            app:layout_constraintTop_toBottomOf="@id/playerSeekBar" />
+            app:layout_constraintTop_toBottomOf="@id/playerSeekBar"
+            app:tint="@color/white" />
 
         <TextView
             android:id="@+id/startDuration"
