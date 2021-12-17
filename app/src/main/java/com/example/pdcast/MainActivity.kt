@@ -1,9 +1,8 @@
 package com.example.pdcast
 
 import android.content.*
+import android.content.res.ColorStateList
 import android.graphics.Color
-import android.graphics.PorterDuff
-import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaMetadataCompat
@@ -26,7 +25,6 @@ import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.onNavDestinationSelected
 import androidx.navigation.ui.setupWithNavController
-import androidx.palette.graphics.Palette
 import com.bumptech.glide.Glide
 import com.example.pdcast.data.api.RssFeedService
 import com.example.pdcast.data.database.PodcastSubscribedDatabase
@@ -36,17 +34,12 @@ import com.example.pdcast.databinding.ActivityMainBinding
 import com.example.pdcast.mediaPlayer.MediaPlaybackService
 import com.example.pdcast.ui.MainViewModel
 import com.example.pdcast.ui.MainViewModelFactory
-import com.example.pdcast.util.PState
-import com.example.pdcast.util.PaletteColor
-import com.example.pdcast.util.getPaletteColor
-import com.example.pdcast.util.getVibrantColorFromPalette
+import com.example.pdcast.util.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.suspendCancellableCoroutine
-import kotlin.coroutines.resumeWithException
 
 
 class MainActivity : AppCompatActivity() {
@@ -120,10 +113,15 @@ class MainActivity : AppCompatActivity() {
             getString(R.string.preference_file_key), Context.MODE_PRIVATE
         )
         val nowPlayingMediaImage = sharedPref.getString("NowPlayingMediaImage", "")
+        val nowPlayingDuration = sharedPref.getString("NowPlayingEpisodeDuration", "")
+        val nowPlayingPosition = sharedPref.getLong("NowPlayingPosition", 0L)
+
         if (previouslyPlayedData()) {
+            binding.mainPlayerProgressBar.progress =
+                (nowPlayingPosition.toInt() / (nowPlayingDuration!!.toInt() * 1000)) * 100
             CoroutineScope(Dispatchers.IO).launch {
                 Log.d(TAG, "onCreate: $nowPlayingMediaImage")
-                val a = getPaletteColor(nowPlayingMediaImage,this@MainActivity)
+                val a = getPaletteColor(nowPlayingMediaImage, this@MainActivity)
                 Log.d(TAG, "onMetadataChanged: $a")
                 mainViewModel.paletteColor(a)
             }
@@ -132,18 +130,38 @@ class MainActivity : AppCompatActivity() {
 
         setListeners()
         binding.bottomPlayerLayout.isVisible = previouslyPlayedData()
-        binding.playPauseButton.drawable.mutate().setColorFilter(Color.WHITE,PorterDuff.Mode.MULTIPLY)
+        binding.playPauseButton.setBackgroundColorToImageButton(Color.WHITE)
+
 
         //Palette Color from mainViewModel
         mainViewModel.paletteColor.flowWithLifecycle(lifecycle).onEach {
             val vibrantColor = getVibrantColorFromPalette(it)
-            Log.d(TAG, "onCreate: ${it}")
-            Log.d(TAG, "onCreate COLOR: ${vibrantColor}")
+            val vibrantDark = getDarkVibrantColor(it)
+            val progressBarTintList = if (vibrantDark != 0) {
+                vibrantDark
+            } else vibrantColor
+//            Log.d(TAG, "onCreate: ${it}")
+//            Log.d(TAG, "onCreate COLOR: ${vibrantColor}")
+//            Log.d(TAG, "onCreate: $vibrantDark")
             val color = vibrantColor.toDrawable()
             color.alpha = 225 / 8
             binding.bottomPlayerLayout.background = color
-            val playPauseGradientDrawable = binding.playPauseButton.background.mutate() as GradientDrawable
-            playPauseGradientDrawable.setColor(vibrantColor)
+            binding.playPauseButton.setBackgroundColorToImageButton(vibrantColor)
+            binding.preButton.setSvgColor(vibrantColor)
+            binding.forButton.setSvgColor(vibrantColor)
+            binding.mainPlayerProgressBar.progressTintList = ColorStateList.valueOf(vibrantColor)
+            binding.mainPlayerProgressBar.setBackgroundColor(getTransparentColor(vibrantColor, 4))
+            binding.heartButton.setColorFilter(vibrantColor)
+        }.launchIn(lifecycleScope)
+
+
+
+        mainViewModel.currentPlayingPosition.flowWithLifecycle(lifecycle).onEach {
+            val duration = sharedPref.getString("NowPlayingEpisodeDuration", "")
+            val progressValue = (it.toDouble() / (duration!!.toDouble() * 1000)) * 100
+            Log.d(TAG, "onCreate: ProgressValue -> ${progressValue.toInt()}")
+            binding.mainPlayerProgressBar.progress = progressValue.toInt()
+
         }.launchIn(lifecycleScope)
     }
 
@@ -230,14 +248,6 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    private fun previouslyPlayedData(): Boolean {
-        val sharedPref = this.getSharedPreferences(
-            getString(R.string.preference_file_key), Context.MODE_PRIVATE
-        )
-        return sharedPref.getBoolean("IsPlayedBefore", false)
-    }
-
-
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return item.onNavDestinationSelected(navController) || super.onOptionsItemSelected(item)
     }
@@ -283,10 +293,9 @@ class MainActivity : AppCompatActivity() {
                 Glide.with(binding.bottomPlayImage).load(nowPlayingMediaImage)
                     .into(binding.bottomPlayImage)
                 Log.d(TAG, "onMetadataChanged: $nowPlayingMediaImage")
-                mainViewModel.playingDataIsChanged()
 
                 CoroutineScope(Dispatchers.IO).launch {
-                    val a = getPaletteColor(nowPlayingMediaImage,this@MainActivity)
+                    val a = getPaletteColor(nowPlayingMediaImage, this@MainActivity)
                     mainViewModel.paletteColor(a)
                 }
             }
@@ -322,9 +331,6 @@ class MainActivity : AppCompatActivity() {
                     mainViewModel.setPlaying(true)
                 }
             }
-
-
-
             if (previouslyPlayedData()) {
                 val sharedPref = this@MainActivity.getSharedPreferences(
                     getString(R.string.preference_file_key), Context.MODE_PRIVATE
@@ -374,6 +380,7 @@ class MainActivity : AppCompatActivity() {
         } else {
             mediaBrowser.connect()
         }
+
     }
 
     override fun onPause() {
@@ -435,9 +442,12 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-
-
-
+    fun previouslyPlayedData(): Boolean {
+        val sharedPref = this.getSharedPreferences(
+            getString(R.string.preference_file_key), Context.MODE_PRIVATE
+        )
+        return sharedPref.getBoolean("IsPlayedBefore", false)
+    }
 
     companion object {
         private const val TAG = "MainActivity"
