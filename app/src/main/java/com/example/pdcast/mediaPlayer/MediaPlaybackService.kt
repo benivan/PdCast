@@ -179,8 +179,8 @@ class MediaPlaybackService : MediaBrowserServiceCompat(), PdCastMediaCallback.Po
         )
 
         notification
-            .setContentTitle(mediaDescription.subtitle)
-            .setContentText(mediaDescription.title)
+            .setContentTitle(mediaDescription.title)
+            .setContentText(mediaDescription.subtitle)
             .setLargeIcon(bitmap)
             .setContentIntent(notificationIntent)
             .setDeleteIntent(
