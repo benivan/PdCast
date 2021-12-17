@@ -38,29 +38,27 @@
 
         <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/bottomPlayImage"
-            android:elevation="4dp"
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:layout_marginStart="8dp"
             android:contentDescription=""
+            android:elevation="4dp"
             android:foregroundGravity="center"
             android:src="@drawable/ic_baseline_album"
-            app:shapeAppearance="@style/ImageStyle"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintBottom_toBottomOf="@+id/playPauseButton"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            />
+            app:layout_constraintTop_toTopOf="@+id/playPauseButton"
+            app:shapeAppearance="@style/ImageStyle" />
 
         <ImageButton
             android:id="@+id/playPauseButton"
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:layout_gravity="center"
-            android:layout_marginTop="4dp"
+            android:layout_marginVertical="4dp"
             android:background="@drawable/play_button_background"
             android:clickable="true"
             android:foreground="@drawable/episode_play_button_foreground"
-            android:hapticFeedbackEnabled="true"
             android:src="@drawable/play_arrow_black"
             android:text="play"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -76,51 +74,57 @@
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:layout_gravity="center"
-            android:layout_marginTop="4dp"
-            android:layout_marginBottom="4dp"
             android:background="@drawable/custom_circular_transparent_backgroung"
             android:clickable="true"
             android:contentDescription="TODO"
             android:foreground="@drawable/episode_play_button_foreground"
             android:src="@drawable/rewind_button"
             android:text="pre"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintBottom_toTopOf="@+id/mainPlayerProgressBar"
             app:layout_constraintLeft_toRightOf="@+id/bottomPlayImage"
             app:layout_constraintRight_toLeftOf="@id/playPauseButton"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="@+id/playPauseButton" />
 
         <ImageButton
             android:id="@+id/forButton"
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:layout_gravity="center"
-            android:layout_marginTop="4dp"
             android:background="@drawable/custom_circular_transparent_backgroung"
             android:clickable="true"
             android:focusable="true"
             android:foreground="@drawable/episode_play_button_foreground"
             android:src="@drawable/forward_buttoon"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintBottom_toBottomOf="@+id/playPauseButton"
             app:layout_constraintLeft_toRightOf="@id/playPauseButton"
             app:layout_constraintRight_toLeftOf="@id/heartButton"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="@+id/playPauseButton" />
 
         <ImageButton
             android:id="@+id/heartButton"
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:layout_gravity="center"
-            android:layout_marginTop="4dp"
             android:layout_marginEnd="8dp"
             android:background="@drawable/custom_circular_transparent_backgroung"
             android:clickable="true"
             android:focusable="true"
             android:foreground="@drawable/episode_play_button_foreground"
             android:src="@drawable/favorite_border"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintBottom_toTopOf="@+id/mainPlayerProgressBar"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintLeft_toRightOf="@id/playPauseButton"
             app:layout_constraintTop_toTopOf="parent" />
+
+        <ProgressBar
+            android:id="@+id/mainPlayerProgressBar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="0dp"
+            android:layout_height="2dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/playPauseButton" />
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>
