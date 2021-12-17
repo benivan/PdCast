@@ -21,7 +21,6 @@ class HomePodcastAdapter(
                 parent,
                 false
             )
-        Log.d(TAG, "onCreateViewHolder: ")
         return PodcastItemViewHolder(binding)
     }
 
