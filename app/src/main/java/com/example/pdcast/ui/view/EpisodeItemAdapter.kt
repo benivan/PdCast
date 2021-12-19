@@ -3,16 +3,25 @@ package com.example.pdcast.ui.view
 
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.example.pdcast.data.response.RssFeedResponse
 import com.example.pdcast.databinding.EpisodeItemsBinding
+import com.example.pdcast.util.PaletteColor
+import com.example.pdcast.util.getVibrantColorFromPalette
+import com.example.pdcast.util.setBackgroundColorToImageButton
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
+import kotlin.system.measureNanoTime
 
 class EpisodeItemAdapter(
     private var episodes: List<RssFeedResponse.EpisodeResponse>,
-    private val episodeListener: EpisodeListener
+    private val episodeListener: EpisodeListener,
 ) : RecyclerView.Adapter<EpisodeItemAdapter.EpisodeItemViewHolder>() {
 
+    private var paletteColor:Int = 100000
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): EpisodeItemViewHolder {
         val binding =
@@ -22,7 +31,10 @@ class EpisodeItemAdapter(
 
     override fun onBindViewHolder(holder: EpisodeItemViewHolder, position: Int) {
         val currentItem = episodes[position]
-        holder.bind(currentItem)
+        if (currentItem.duration != "null"){
+            holder.bind(currentItem)
+        }
+
     }
 
     fun submitList(list: List<RssFeedResponse.EpisodeResponse>) {
@@ -41,6 +53,14 @@ class EpisodeItemAdapter(
     }
 
 
+    fun setPalateColor(color: PaletteColor) {
+        paletteColor = getVibrantColorFromPalette(color)
+        notifyDataSetChanged()
+    }
+
+
+
+
     inner class EpisodeItemViewHolder(private val binding: EpisodeItemsBinding) :
         RecyclerView.ViewHolder(binding.root) {
         fun bind(currentItem: RssFeedResponse.EpisodeResponse) {
@@ -50,11 +70,19 @@ class EpisodeItemAdapter(
                     ?: currentItem.description
             binding.tvPubdate.text = currentItem.pubDate
             binding.duration.text =
-                currentItem.duration?.let { convertSecondIntoDuration(it.toInt()) }
+                currentItem.duration?.let {
+                    if (currentItem.duration != "null"){
+                        convertSecondIntoDuration(it.toInt())
+                    }else "0"
+//                    convertSecondIntoDuration(it.toInt())
+                }
             binding.play.setOnClickListener {
                 Log.d(TAG, "bind-Link: ${currentItem.episodeUrl}")
                 episodeListener.onEpisodeClicked(currentItem)
             }
+            binding.play.setBackgroundColorToImageButton(paletteColor)
+
+
         }
 
     }
@@ -79,6 +107,8 @@ class EpisodeItemAdapter(
         convertedDuration = if (hour == 0) {
             "${addZero(min)}:${addZero(second)}"
         } else "${addZero(hour)}:${addZero(min)}:${addZero(second)}"
+
+        if (convertedDuration == null ) convertedDuration = "0"
 
         return convertedDuration
     }
