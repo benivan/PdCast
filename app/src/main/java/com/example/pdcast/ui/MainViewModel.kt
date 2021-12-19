@@ -2,6 +2,7 @@ package com.example.pdcast.ui
 
 import android.app.Application
 import android.support.v4.media.session.MediaControllerCompat
+import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
@@ -14,6 +15,7 @@ import com.example.pdcast.data.response.RssFeedResponse
 import com.example.pdcast.util.PaletteColor
 import com.example.pdcast.util.Resource
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -37,7 +39,7 @@ class MainViewModel(
     private val _currentPlayingPosition = MutableSharedFlow<Long>(1)
     var currentPlayingPosition = _currentPlayingPosition.asSharedFlow()
 
-    private val _nowPlayingMetaChanged = MutableStateFlow<Boolean>(false)
+    private val _nowPlayingMetaChanged = MutableStateFlow(false)
     var nowPlayingDataIsCHanged = _nowPlayingMetaChanged.asStateFlow()
 
     private val _paletteColor = MutableSharedFlow<PaletteColor>(1)
@@ -56,15 +58,17 @@ class MainViewModel(
 
 
     fun setController(controllerCompat: MediaControllerCompat) {
+
         controller = controllerCompat
         viewModelScope.launch {
-            val isGoodTimeToEmit = isPlaying.replayCache[0]
-            if (isGoodTimeToEmit) {
+//            Log.d(TAG, "setController: ReplayCache${currentPlayingPosition.replayCache}")
+            if (controller!!.playbackState.state == PlaybackStateCompat.STATE_PLAYING) {
                 controllerCompat.playbackState.position.let {
-                    if (it > 999L) {
-                        Log.d(TAG, "setController: $it")
-                        _currentPlayingPosition.emit(it)
-                    }
+                        if (it > 990L) {
+                            Log.d(TAG, "setController: $it")
+                            _currentPlayingPosition.emit(it)
+                        }
+
                 }
             }
             delay(1000)
@@ -73,8 +77,14 @@ class MainViewModel(
 
     }
 
-    fun playingDataIsChanged(){
+
+
+
+    fun playingDataIsChanged() {
         viewModelScope.launch {
+            _currentPlayingPosition.resetReplayCache()
+            Log.d(TAG, "playingDataIsChanged: DELETED REPLAY CACHE ${_currentPlayingPosition.replayCache.indexOf(0)}")
+            _currentPlayingPosition.emit(0L)
             _nowPlayingMetaChanged.emit(true)
         }
 
@@ -114,10 +124,11 @@ class MainViewModel(
         }
     }
 
-    suspend fun addPodcastToSubscribe(feedUrl:String){
+    suspend fun addPodcastToSubscribe(feedUrl: String) {
         rssFeedPodcastRepository.addPodcastToSubscribed(feedUrl)
     }
-    suspend fun removePodcastFromSubscribeTable(feedUrl: String){
+
+    suspend fun removePodcastFromSubscribeTable(feedUrl: String) {
         rssFeedPodcastRepository.removePodcastToSubscribe(feedUrl)
     }
 
@@ -140,9 +151,10 @@ class MainViewModel(
         }
     }
 
-    fun bufferingLevel(intExtra: Int) {
+    fun bufferingLevel() {
+        Log.d(TAG, "bufferingLevel: Called")
         viewModelScope.launch {
-            _bufferLevel.emit(intExtra)
+            getController()?.playbackState?.bufferedPosition?.toInt()?.let { _bufferLevel.emit(it) }
         }
     }
 
