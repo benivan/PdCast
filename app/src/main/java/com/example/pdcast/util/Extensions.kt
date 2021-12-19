@@ -1,7 +1,9 @@
 package com.example.pdcast.util
 
 import android.app.Activity
+import android.os.Build
 import android.view.View
+import android.view.WindowManager
 import android.view.inputmethod.InputMethodManager
 
 
@@ -16,3 +18,13 @@ fun Activity.hideKeyboard() {
     }
     imm.hideSoftInputFromWindow(view.windowToken, 0)
 }
+
+
+fun changeColorOfTheStatusBar(activity: Activity, color: Int){
+    if (Build.VERSION.SDK_INT >= 21) {
+        val window =activity.window
+        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
+        window.statusBarColor = color
+    }
+}
+
