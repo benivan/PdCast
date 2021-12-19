@@ -113,7 +113,7 @@ class MainActivity : AppCompatActivity() {
             getString(R.string.preference_file_key), Context.MODE_PRIVATE
         )
         val nowPlayingMediaImage = sharedPref.getString("NowPlayingMediaImage", "")
-        val nowPlayingDuration = sharedPref.getString("NowPlayingEpisodeDuration", "")
+        val nowPlayingDuration = sharedPref.getString("NowPlayingEpisodeDuration", "0")
         val nowPlayingPosition = sharedPref.getLong("NowPlayingPosition", 0L)
 
         if (previouslyPlayedData()) {
@@ -157,7 +157,7 @@ class MainActivity : AppCompatActivity() {
 
 
         mainViewModel.currentPlayingPosition.flowWithLifecycle(lifecycle).onEach {
-            val duration = sharedPref.getString("NowPlayingEpisodeDuration", "")
+            val duration = sharedPref.getString("NowPlayingEpisodeDuration", "0")
             val progressValue = (it.toDouble() / (duration!!.toDouble() * 1000)) * 100
             Log.d(TAG, "onCreate: ProgressValue -> ${progressValue.toInt()}")
             binding.mainPlayerProgressBar.progress = progressValue.toInt()
@@ -219,6 +219,9 @@ class MainActivity : AppCompatActivity() {
     private val navDestinationChangedListener = OnDestinationChangedListener { _, destination, _ ->
         binding.bottomNavigation.isVisible = destination.id != R.id.playerFragment
         binding.bottomPlayerLayout.isVisible = destination.id != R.id.playerFragment
+        if (destination.id == R.id.homeFragment) changeColorOfTheStatusBar(this,Color.WHITE)
+        if (destination.id == R.id.playerFragment) changeColorOfTheStatusBar(this,Color.BLACK)
+
     }
 
     private fun playFromSharedPreference() {
@@ -356,6 +359,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onStart() {
+//        changeColorOfTheStatusBar(this,Color.WHITE)
         super.onStart()
         Log.d(TAG, "onStart: ")
         navController.addOnDestinationChangedListener(navDestinationChangedListener)
@@ -368,6 +372,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onResume() {
+//        changeColorOfTheStatusBar(this,Color.WHITE)
         super.onResume()
         Log.d(TAG, "onResume: ")
         initMediaBrowser()
@@ -434,7 +439,7 @@ class MainActivity : AppCompatActivity() {
                     if (state == 3) mainViewModel.setPlaying(true)
                 } else if (it.hasExtra("BUFFERING_LEVEL")) {
                     mainViewModel.bufferingLevel(
-                        it.getIntExtra("BUFFERING_LEVEL", 0)
+
                     )
                 }
                 Unit
