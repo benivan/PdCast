@@ -118,11 +118,11 @@ class PodcastDetailAndEpisodeFragment : Fragment() {
                 BlendModeColorFilter(vibrantColor, BlendMode.COLOR)
             binding.podcastSubscribeButton.background.colorFilter =
                 BlendModeColorFilter(vibrantColor, BlendMode.COLOR)
-
             episodeAdapter.setPalateColor(it)
+            changeColorOfTheStatusBar(requireActivity(),darkerColor)
         }.launchIn(lifecycleScope)
 
-        viewModel.podcast.flowWithLifecycle(lifecycle).onEach {
+        viewModel.podcast.flowWithLifecycle(lifecycle).onEach { it ->
             when (it) {
                 is Resource.Failure -> {
                     Log.d(TAG, "onViewCreated: failure")
@@ -152,7 +152,7 @@ class PodcastDetailAndEpisodeFragment : Fragment() {
                         binding.podcastSubscribeButton.text = "UnSubscribe"
                     } else binding.podcastSubscribeButton.text = "Subscribe"
                     Glide.with(binding.imageView).load(it.data.imageUrl).into(binding.imageView)
-
+//                    it.data.episodes.forEach { episodeResponse -> Log.d("PodcastDetailAndEpisodeFragment", "episodeDurations: ${episodeResponse.duration},${episodeResponse.title}") }
                     episodeAdapter.submitList(it.data.episodes)
 
                     CoroutineScope(Dispatchers.IO).launch {
@@ -208,7 +208,6 @@ class PodcastDetailAndEpisodeFragment : Fragment() {
 
         if(nowPlayingPodcastMediaUrl != episodeViewData.episodeUrl){
             mainViewModel.playingDataIsChanged()
-            Log.d(TAG, "startPlaying: MEDIA IS CHANGED!")
         }
         with(sharedPref.edit()) {
             putBoolean("IsPlayedBefore", true)
@@ -245,7 +244,7 @@ class PodcastDetailAndEpisodeFragment : Fragment() {
             episodeViewData.imageUrl
         )
 
-        episodeViewData.duration?.let { removeColon(it) }?.let {
+        episodeViewData.duration?.let { if (it != "null")removeColon(it) else 0 }?.let {
             bundle.putLong(
                 MediaMetadata.METADATA_KEY_DURATION,
                 it * 1000L
@@ -257,7 +256,6 @@ class PodcastDetailAndEpisodeFragment : Fragment() {
             bundle
         )
 
-        Log.d(TAG, "startPlaying: This is called ${episodeViewData.episodeUrl} HERE WE GOOOO!!")
     }
 
     @RequiresApi(Build.VERSION_CODES.Q)
