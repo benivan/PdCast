@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Widget.App.TextInputLayoutWithoutLabel" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <item name="android:textColorHint">@color/ash</item>
+        <item name="expandedHintEnabled">true</item>
+        <item name="errorEnabled">true</item>
+        <item name="hintEnabled">false</item>
+        <item name="helperTextEnabled">true</item>
+        <item name="helperTextTextAppearance">@style/HelperTextInputLayout</item>
+        <item name="helperTextTextColor">@color/steel</item>
+        <item name="errorTextAppearance">@style/ErrorTextInputLayout</item>
+        <item name="errorTextColor">@color/red_error_color</item>
+        <item name="boxBackgroundColor">@color/disabled_button</item>
+        <item name="boxStrokeWidth">0dp</item>
+        <item name="boxStrokeWidthFocused">0dp</item>
+        <item name="shapeAppearance">@style/ShapeAppearance.App.SmallComponent</item>
+        <item name="materialThemeOverlay">@style/ThemeOverlay.App.TextInputEditText</item>
+    </style>
+
+    <style name="ThemeOverlay.App.TextInputEditText" parent="ThemeOverlay.MaterialComponents.TextInputEditText.FilledBox.Dense">
+        <item name="editTextStyle">@style/Widget.App.TextInputEditText</item>
+    </style>
+
+    <style name="Widget.App.TextInputEditText" parent="Widget.MaterialComponents.TextInputEditText.FilledBox.Dense">
+        <item name="android:textAppearance">@style/Body_V2</item>
+        <item name="android:textColor">@color/dark</item>
+        <item name="android:textColorHint">@color/ash</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:paddingTop">4dp</item>
+        <item name="android:paddingBottom">4dp</item>
+        <item name="android:minHeight">50dp</item>
+        <item name="android:lineSpacingMultiplier">1.2</item>
+    </style>
+
+    <style name="Widget.App.TextInputLayoutWithoutLabelTransparent" parent="Widget.App.TextInputLayoutWithoutLabel">
+        <item name="boxBackgroundColor">@color/transparent</item>
+        <item name="materialThemeOverlay">@style/ThemeOverlay.App.TextInputEditTextTransparent</item>
+    </style>
+
+    <style name="ThemeOverlay.App.TextInputEditTextTransparent" parent="ThemeOverlay.App.TextInputEditText">
+        <item name="editTextStyle">@style/Widget.App.TextInputEditTextTransparent</item>
+    </style>
+
+    <style name="Widget.App.TextInputEditTextTransparent" parent="Widget.App.TextInputEditText">
+        <item name="android:paddingStart">0dp</item>
+        <item name="android:paddingEnd">0dp</item>
+    </style>
+
+
+    <style name="ShapeAppearance.App.SmallComponent" parent="ShapeAppearance.MaterialComponents.SmallComponent">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">8dp</item>
+    </style>
+
+    <style name="HintTextInputLayout">
+        <item name="android:textAppearance">@style/Mini_V2</item>
+        <item name="android:textColor">@color/ash</item>
+    </style>
+
+    <style name="HelperTextInputLayout">
+        <item name="android:textAppearance">@style/Mini_V2</item>
+    </style>
+
+    <style name="ErrorTextInputLayout">
+        <item name="android:textAppearance">@style/Mini_V2</item>
+    </style>
+
+</resources>

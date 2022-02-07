@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Hero_V2">
+        <item name="android:fontFamily">@font/causten_extrabold</item>
+        <item name="android:textSize">36sp</item>
+        <item name="android:lineSpacingMultiplier">1.1</item>
+    </style>
+
+    <style name="SideKick_V2" >
+        <item name="android:fontFamily">@font/causten_extrabold</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:lineSpacingMultiplier">1.1</item>
+    </style>
+
+    <style name="Body_V2" >
+        <item name="android:textColor">@color/dark</item>
+        <item name="android:fontFamily">@font/causten_regular</item>
+        <item name="android:textSize">17sp</item>
+        <item name="android:lineSpacingMultiplier">1.1</item>
+    </style>
+
+    <style name="Body_V2.Bold" parent="Body_V2" >
+        <item name="android:fontFamily">@font/causten_bold</item>
+        <item name="android:lineSpacingMultiplier">1.1</item>
+    </style>
+
+    <style name="Body_V2.Medium" parent="Body_V2" >
+        <item name="android:fontFamily">@font/causten_medium</item>
+        <item name="android:lineSpacingMultiplier">1.1</item>
+    </style>
+
+    <style name="Body_V2.Regular" parent="Body_V2" >
+        <item name="android:fontFamily">@font/causten_regular</item>
+        <item name="android:lineSpacingMultiplier">1.1</item>
+    </style>
+
+    <style name="Mini_V2" >
+        <item name="android:fontFamily">@font/causten_regular</item>
+        <item name="android:textSize">15sp</item>
+        <item name="android:lineSpacingMultiplier">1.2</item>
+    </style>
+
+    <style name="Mini_V2.Medium" parent="Mini_V2" >
+        <item name="android:fontFamily">@font/causten_medium</item>
+    </style>
+
+    <style name="Mini_V2.Bold" parent="Mini_V2">
+        <item name="android:fontFamily">@font/causten_bold</item>
+    </style>
+
+    <style name="Title_V2" >
+        <item name="android:fontFamily">@font/causten_extrabold</item>
+        <item name="android:textSize">26sp</item>
+        <item name="android:lineSpacingMultiplier">1.1</item>
+    </style>
+
+    <style name="Title_Small_V2">
+        <item name="android:fontFamily">@font/causten_bold</item>
+        <item name="android:textSize">17sp</item>
+        <item name="android:lineSpacingMultiplier">1.2</item>
+    </style>
+
+</resources>

@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.*
 import android.view.inputmethod.EditorInfo
+import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.flowWithLifecycle
@@ -12,13 +13,12 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.pdcast.databinding.FragmentSearchBinding
 import com.example.pdcast.ui.MainViewModel
 import com.example.pdcast.ui.PodcastsSearchViewModel
-import com.example.pdcast.util.DataMapper
-import com.example.pdcast.util.Resource
-import com.example.pdcast.util.hideKeyboard
+import com.example.pdcast.util.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import java.util.*
 
 
 class SearchFragment : Fragment() {
@@ -47,9 +47,26 @@ class SearchFragment : Fragment() {
         binding.textView.visibility = View.GONE
         binding.progressBar.visibility = View.GONE
         binding.floatingActionButton.visibility = View.GONE
+        var timer = Timer()
+        binding.etSearch.addTextChangedListener {
+            timer.cancel()
+            if (!it.isNullOrEmpty()){
+                viewModel.getPodcastWithTerms(it.toString())
+            }
+        }
+        binding.tvCancelSearch.setOnClickListener {
+            binding.etSearch.setText("")
+            viewModel.getPodcastWithTerms("")
+            binding.etSearch.clearFocus()
+            hideKeyboard()
+        }
 
-        binding.btnSearch.setOnClickListener {
-            viewModel.getPodcastWithTerms(binding.searchTextInput.text.toString())
+        binding.etSearch.setOnFocusChangeListener { view, hasFocus ->
+            if (hasFocus) {
+                binding.tvCancelSearch.visible()
+            } else {
+                binding.tvCancelSearch.gone()
+            }
         }
 
 
@@ -106,9 +123,9 @@ class SearchFragment : Fragment() {
             }.launchIn(lifecycleScope)
 
 
-        binding.searchTextInput.setOnEditorActionListener { _, actionId, _ ->
+        binding.etSearch.setOnEditorActionListener { _, actionId, _ ->
             if (EditorInfo.IME_ACTION_SEARCH == actionId) {
-                viewModel.getPodcastWithTerms(binding.searchTextInput.text.toString())
+                viewModel.getPodcastWithTerms(binding.etSearch.text.toString())
                 requireActivity().hideKeyboard()
                 return@setOnEditorActionListener true
             }

@@ -7,5 +7,6 @@
     <string name="forward">forward</string>
     
     <string name="preference_file_key">SharePreferencePdCast</string>
-
+    <string name="search">Search</string>
+    <string name="action_cancel">Cancel</string>
 </resources>

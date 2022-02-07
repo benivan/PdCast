@@ -24,9 +24,9 @@ interface RssFeedPodcastDao {
     @Query("SELECT * FROM podcast_table WHERE podcastId =:podcastId")
     fun getEpisodeWithPodcast(podcastId: Long): Flow<PodcastsWithEpisodes>
 
-    @Transaction
-    @Query("SELECT * FROM podcasts_episodes_table WHERE podcastId =:podcastId")
-    fun pagingSourceEpisodesWithPodcastId(podcastId: Long): PagingSource<Int, DBPodcastsEpisodes>
+//    @Transaction
+//    @Query("SELECT * FROM podcasts_episodes_table WHERE podcastId =:podcastId")
+//    fun pagingSourceEpisodesWithPodcastId(podcastId: Long): PagingSource<Int, DBPodcastsEpisodes>
 
     @Transaction
     @Query("SELECT * FROM podcast_table WHERE title=:podcastTitle")
