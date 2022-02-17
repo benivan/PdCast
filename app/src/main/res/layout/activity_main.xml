@@ -41,8 +41,7 @@
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:layout_marginStart="8dp"
-            android:contentDescription=""
-            android:elevation="4dp"
+            android:contentDescription="Podcast "
             android:foregroundGravity="center"
             android:src="@drawable/ic_baseline_album"
             app:layout_constraintBottom_toBottomOf="@+id/playPauseButton"
@@ -128,7 +127,6 @@
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_navigation"
