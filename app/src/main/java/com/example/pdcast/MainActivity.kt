@@ -2,7 +2,9 @@ package com.example.pdcast
 
 import android.content.*
 import android.content.res.ColorStateList
+import android.content.res.Configuration
 import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaMetadataCompat
@@ -10,17 +12,21 @@ import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
-import android.view.MenuItem
+import android.view.*
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.graphics.drawable.toDrawable
 import androidx.core.net.toUri
+import androidx.core.view.ViewCompat.setWindowInsetsAnimationCallback
 import androidx.core.view.isVisible
+import androidx.fragment.app.FragmentTransaction
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.NavController.OnDestinationChangedListener
+import androidx.navigation.NavOptions
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.onNavDestinationSelected
@@ -40,6 +46,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
 
 
 class MainActivity : AppCompatActivity() {
@@ -61,6 +68,7 @@ class MainActivity : AppCompatActivity() {
     lateinit var mainViewModel: MainViewModel
 
 
+    @RequiresApi(Build.VERSION_CODES.R)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         try {
@@ -89,7 +97,14 @@ class MainActivity : AppCompatActivity() {
 
         navController = navHostFragment.navController
 
-        binding.bottomNavigation.setupWithNavController(navController)
+        val orientation = this.resources.configuration.orientation
+
+        if(orientation == Configuration.ORIENTATION_PORTRAIT){
+            binding.bottomNavigation?.setupWithNavController(navController)
+        }else{
+            binding.navigation?.setupWithNavController(navController)
+        }
+
 
         val appBarConfiguration = AppBarConfiguration(
             topLevelDestinationIds = setOf(),
@@ -117,6 +132,7 @@ class MainActivity : AppCompatActivity() {
         val nowPlayingPosition = sharedPref.getLong("NowPlayingPosition", 0L)
 
         if (previouslyPlayedData()) {
+            mainViewModel.setBottomLayoutPlayerVisibility(true)
             binding.mainPlayerProgressBar.progress =
                 (nowPlayingPosition.toInt() / (nowPlayingDuration!!.toInt() * 1000)) * 100
             CoroutineScope(Dispatchers.IO).launch {
@@ -125,11 +141,9 @@ class MainActivity : AppCompatActivity() {
                 Log.d(TAG, "onMetadataChanged: $a")
                 mainViewModel.paletteColor(a)
             }
-        }
-
+        }else mainViewModel.setBottomLayoutPlayerVisibility(false)
 
         setListeners()
-        binding.bottomPlayerLayout.isVisible = previouslyPlayedData()
         binding.playPauseButton.setBackgroundColorToImageButton(Color.WHITE)
 
 
@@ -140,9 +154,6 @@ class MainActivity : AppCompatActivity() {
             val progressBarTintList = if (vibrantDark != 0) {
                 vibrantDark
             } else vibrantColor
-//            Log.d(TAG, "onCreate: ${it}")
-//            Log.d(TAG, "onCreate COLOR: ${vibrantColor}")
-//            Log.d(TAG, "onCreate: $vibrantDark")
             val color = vibrantColor.toDrawable()
             color.alpha = 225 / 8
             binding.bottomPlayerLayout.background = color
@@ -159,10 +170,27 @@ class MainActivity : AppCompatActivity() {
         mainViewModel.currentPlayingPosition.flowWithLifecycle(lifecycle).onEach {
             val duration = sharedPref.getString("NowPlayingEpisodeDuration", "0")
             val progressValue = (it.toDouble() / (duration!!.toDouble() * 1000)) * 100
-            Log.d(TAG, "onCreate: ProgressValue -> ${progressValue.toInt()}")
             binding.mainPlayerProgressBar.progress = progressValue.toInt()
 
         }.launchIn(lifecycleScope)
+
+//        mainViewModel.isBottomPlayerLayoutVisible.flowWithLifecycle(lifecycle).onEach {
+//            binding.bottomPlayerLayout.isVisible = it
+//        }
+        this?.let {
+            val main = it as MainActivity
+            KeyboardVisibilityEvent.setEventListener(
+                it,
+                this
+            ) { isOpen ->
+                if (isOpen) {
+                    main.hideBottomNavAndBottomPlayerLayout()
+                } else {
+                    main.showBottomNavAndBottomPlayerLayout()
+                }
+            }
+        }
+
     }
 
     private fun setListeners() {
@@ -177,7 +205,6 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             if (controller.playbackState == null) {
-                Log.d(TAG, "onCreate: controller is null")
                 if (previouslyPlayedData()) {
                     playFromSharedPreference()
                 }
@@ -210,14 +237,15 @@ class MainActivity : AppCompatActivity() {
 
         binding.bottomPlayerLayout.setOnClickListener {
             if (previouslyPlayedData()) {
-//                navController.navigateUp()
-                navController.navigate(R.id.playerFragment)
+                val navBuilder: NavOptions.Builder = NavOptions.Builder()
+                navBuilder.setEnterAnim(R.anim.enter_from_bottom).setExitAnim(R.anim.exit_to_bottom)
+                navController.navigate(R.id.playerFragment,null,navBuilder.build())
             }
         }
     }
 
     private val navDestinationChangedListener = OnDestinationChangedListener { _, destination, _ ->
-        binding.bottomNavigation.isVisible = destination.id != R.id.playerFragment
+        binding.bottomNavigation?.isVisible = destination.id != R.id.playerFragment
         binding.bottomPlayerLayout.isVisible = destination.id != R.id.playerFragment
         if (destination.id == R.id.homeFragment) changeColorOfTheStatusBar(this,Color.WHITE)
         if (destination.id == R.id.playerFragment) changeColorOfTheStatusBar(this,Color.BLACK)
@@ -361,7 +389,6 @@ class MainActivity : AppCompatActivity() {
     override fun onStart() {
 //        changeColorOfTheStatusBar(this,Color.WHITE)
         super.onStart()
-        Log.d(TAG, "onStart: ")
         navController.addOnDestinationChangedListener(navDestinationChangedListener)
         val intentFilter = IntentFilter(MediaPlaybackService.PREPARED)
         registerReceiver(preparedListener, intentFilter)
@@ -374,19 +401,29 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
 //        changeColorOfTheStatusBar(this,Color.WHITE)
         super.onResume()
-        Log.d(TAG, "onResume: ")
         initMediaBrowser()
         if (mediaBrowser.isConnected) {
-            Log.d(TAG, "onStart: media browser connected")
             if (MediaControllerCompat.getMediaController(this) == null) {
-                Log.d(TAG, "onStart: setting the controller")
                 registerMediaController(mediaBrowser.sessionToken)
             }
         } else {
             mediaBrowser.connect()
         }
-
+        this?.let {
+            val main = it as MainActivity
+            KeyboardVisibilityEvent.setEventListener(
+                it,
+                this
+            ) { isOpen ->
+                if (isOpen) {
+                    main.hideBottomNavAndBottomPlayerLayout()
+                } else {
+                    main.showBottomNavAndBottomPlayerLayout()
+                }
+            }
+        }
     }
+
 
     override fun onPause() {
         super.onPause()
@@ -452,6 +489,16 @@ class MainActivity : AppCompatActivity() {
             getString(R.string.preference_file_key), Context.MODE_PRIVATE
         )
         return sharedPref.getBoolean("IsPlayedBefore", false)
+    }
+
+    fun hideBottomNavAndBottomPlayerLayout(){
+        binding.bottomNavigation?.gone()
+        binding.bottomPlayerLayout.gone()
+    }
+
+    fun showBottomNavAndBottomPlayerLayout(){
+        binding.bottomPlayerLayout.visible()
+        binding.bottomNavigation?.visible()
     }
 
     companion object {
