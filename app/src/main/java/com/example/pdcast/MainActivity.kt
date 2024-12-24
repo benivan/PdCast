@@ -49,7 +49,7 @@ import kotlinx.coroutines.launch
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
 
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(){
 
     private val binding by lazy { ActivityMainBinding.inflate(layoutInflater) }
 
@@ -132,7 +132,7 @@ class MainActivity : AppCompatActivity() {
         val nowPlayingPosition = sharedPref.getLong("NowPlayingPosition", 0L)
 
         if (previouslyPlayedData()) {
-            mainViewModel.setBottomLayoutPlayerVisibility(true)
+//            mainViewModel.setBottomLayoutPlayerVisibility(true)
             binding.mainPlayerProgressBar.progress =
                 (nowPlayingPosition.toInt() / (nowPlayingDuration!!.toInt() * 1000)) * 100
             CoroutineScope(Dispatchers.IO).launch {
@@ -141,7 +141,8 @@ class MainActivity : AppCompatActivity() {
                 Log.d(TAG, "onMetadataChanged: $a")
                 mainViewModel.paletteColor(a)
             }
-        }else mainViewModel.setBottomLayoutPlayerVisibility(false)
+        }
+//        else mainViewModel.setBottomLayoutPlayerVisibility(false)
 
         setListeners()
         binding.playPauseButton.setBackgroundColorToImageButton(Color.WHITE)
