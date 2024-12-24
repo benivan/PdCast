@@ -18,9 +18,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.graphics.drawable.toDrawable
 import androidx.core.net.toUri
-import androidx.core.view.ViewCompat.setWindowInsetsAnimationCallback
 import androidx.core.view.isVisible
-import androidx.fragment.app.FragmentTransaction
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.lifecycleScope
