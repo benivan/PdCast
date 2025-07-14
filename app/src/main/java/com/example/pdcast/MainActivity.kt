@@ -47,6 +47,12 @@ import kotlinx.coroutines.launch
 import net.yslibrary.android.keyboardvisibilityevent.KeyboardVisibilityEvent
 
 
+/**
+ * Legacy MainActivity using XML layouts and Fragment navigation
+ * This is preserved for backward compatibility
+ * 
+ * NEW: See MainActivityCompose.kt for the modernized Jetpack Compose version
+ */
 class MainActivity : AppCompatActivity(){
 
     private val binding by lazy { ActivityMainBinding.inflate(layoutInflater) }
