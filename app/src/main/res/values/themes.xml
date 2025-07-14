@@ -15,4 +15,10 @@
 
         <item name="textInputStyle">@style/Widget.App.TextInputLayoutWithoutLabel</item>
     </style>
+
+    <!-- Theme for Compose Activity -->
+    <style name="Theme.PdCast.NoActionBar" parent="Theme.PdCast">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
 </resources>
