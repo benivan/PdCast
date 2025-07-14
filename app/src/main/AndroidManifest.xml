@@ -20,20 +20,37 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.PdCast">
-        <activity android:name=".MainActivity">
+        <!-- Legacy Activity -->
+        <activity android:name=".MainActivity"
+            android:exported="false" />
+
+        <!-- Modern Compose Activity -->
+        <activity android:name=".MainActivityCompose"
+            android:exported="true"
+            android:theme="@style/Theme.PdCast.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
+        <!-- Legacy Media Service -->
         <service android:name=".mediaPlayer.MediaPlaybackService"
             android:exported="true"
             android:foregroundServiceType="mediaPlayback"
             android:enabled="true">
             <intent-filter>
                 <action android:name="android.media.browse.MediaBrowserService"/>
+            </intent-filter>
+        </service>
+
+        <!-- Modern Media3 Service -->
+        <service android:name=".mediaPlayer.Media3PlaybackService"
+            android:exported="true"
+            android:foregroundServiceType="mediaPlayback"
+            android:enabled="true">
+            <intent-filter>
+                <action android:name="androidx.media3.session.MediaSessionService"/>
             </intent-filter>
         </service>
 
